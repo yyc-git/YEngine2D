@@ -10,10 +10,17 @@ bower install yengine2d
 ```
 2、或者运行build命令
 ```js
+npm install
 grunt build
 ```
 然后在项目中引用dist目录的yEngine2D.js或yEngine2D.min.js文件
 ##测试
+首先安装npm模块和前端依赖库
+```js
+npm install
+bower install
+```
+然后执行测试命令
 ```js
 grunt test
 ```
