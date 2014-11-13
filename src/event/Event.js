@@ -1,3 +1,12 @@
+/**YEngine2D
+ * author：YYC
+ * date：2014-01-05
+ * email：395976266@qq.com
+ * qq: 395976266
+ * blog：http://www.cnblogs.com/chaogex/
+ * homepage:
+ * license: MIT
+ */
 namespace("YE").Event = {
     //事件枚举值
     KEY_DOWN: 0,

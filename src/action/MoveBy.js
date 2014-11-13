@@ -1,9 +1,11 @@
-/**YEngine2D 移动动作类
+/**YEngine2D
  * author：YYC
  * date：2014-10-09
  * email：395976266@qq.com
  * qq: 395976266
  * blog：http://www.cnblogs.com/chaogex/
+ * homepage:
+ * license: MIT
  */
 YE.MoveBy = YYC.Class(YE.ActionInterval, {
     Init: function (duration, x, y) {

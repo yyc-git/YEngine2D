@@ -1,16 +1,18 @@
-/**YEngine2D 实体类
+/**YEngine2D
  * author：YYC
  * date：2014-02-08
  * email：395976266@qq.com
  * qq: 395976266
  * blog：http://www.cnblogs.com/chaogex/
+ * homepage:
+ * license: MIT
  */
 
 /*!
 私有成员前缀为“ye_entity_”
 为什么不将前缀设成“ye_”？
-这是因为是这样，那么继承Entity的引擎类的私有成员前缀就都要加一个下划线“_”。
-因此，将前缀设为Entity类独有，则不用担心子类的私有成员会覆盖Entity的私有成员！
+因为如果这样，继承Entity的引擎类的私有成员前缀就都要加一个下划线“_”。
+因此，将前缀设为Entity类独有，则不用担心子类的私有成员覆盖Entity的私有成员！
 */
 YE.Entity = YYC.AClass({
     Init: function () {

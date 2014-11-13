@@ -1,13 +1,11 @@
-/**YEngine2D 单个动画帧类
- * 序列帧动画信息，它存储了所有的单帧信息，
- * 它存储一个动画的所有帧信息
- * 可以对该动画的单帧信息进行管理（如设置循环次数，设置延迟时间等）。
- *
+/**YEngine2D
  * author：YYC
  * date：2014-01-11
  * email：395976266@qq.com
  * qq: 395976266
  * blog：http://www.cnblogs.com/chaogex/
+ * homepage:
+ * license: MIT
  */
 (function () {
     YE.Animation = YYC.Class(YE.Entity, {

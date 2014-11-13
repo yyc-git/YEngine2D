@@ -1,9 +1,11 @@
-/**YEngine2D 节点容器类
+/**YEngine2D
  * author：YYC
  * date：2014-02-18
  * email：395976266@qq.com
  * qq: 395976266
  * blog：http://www.cnblogs.com/chaogex/
+ * homepage:
+ * license: MIT
  */
 YE.NodeContainer = YYC.AClass(YE.Node, {
     Init: function () {

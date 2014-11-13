@@ -1,9 +1,11 @@
-/**YSoundEngine 声音引擎，负责声音加载，提供声音底层api
+/**YSoundEngine
  * author：YYC
  * date：2014-05-26
  * email：395976266@qq.com
  * qq: 395976266
  * blog：http://www.cnblogs.com/chaogex/
+ * homepage:
+ * license: MIT
  */
 (function () {
     YE.YSoundEngine = YYC.Class({

@@ -1,9 +1,11 @@
-/**YEngine2D 场景类
+/**YEngine2D
  * author：YYC
  * date：2013-12-24
  * email：395976266@qq.com
  * qq: 395976266
  * blog：http://www.cnblogs.com/chaogex/
+ * homepage:
+ * license: MIT
  */
 (function () {
     YE.Scene = YYC.AClass(YE.NodeContainer, {

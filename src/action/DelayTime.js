@@ -1,9 +1,11 @@
-/**YEngine2D 延迟动作类
+/**YEngine2D
  * author：YYC
  * date：2014-04-21
  * email：395976266@qq.com
  * qq: 395976266
  * blog：http://www.cnblogs.com/chaogex/
+ * homepage:
+ * license: MIT
  */
 YE.DelayTime = YYC.Class(YE.ActionInterval, {
     Init: function (delayTime) {

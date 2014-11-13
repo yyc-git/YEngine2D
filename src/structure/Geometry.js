@@ -1,4 +1,4 @@
-/**YEngine2D 几何类
+/**YEngine2D
  * author：YYC
  * date：2014-01-11
  * email：395976266@qq.com

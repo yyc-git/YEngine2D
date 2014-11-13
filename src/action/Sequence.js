@@ -1,11 +1,12 @@
-/**YEngine2D 序列动作类，顺序执行动作
+/**YEngine2D
  * author：YYC
  * date：2014-01-20
  * email：395976266@qq.com
  * qq: 395976266
  * blog：http://www.cnblogs.com/chaogex/
+ * homepage:
+ * license: MIT
  */
-
 YE.Sequence = YYC.Class(YE.Control, {
     Init: function () {
         this.base();

@@ -1,9 +1,11 @@
-/**YEngine2D 调用方法类
+/**YEngine2D
  * author：YYC
  * date：2014-04-21
  * email：395976266@qq.com
  * qq: 395976266
  * blog：http://www.cnblogs.com/chaogex/
+ * homepage:
+ * license: MIT
  */
 YE.CallFunc = YYC.Class(YE.ActionInstant, {
     Init: function (func, context, dataArr) {

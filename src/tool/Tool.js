@@ -1,4 +1,4 @@
-/**YEngine2D 辅助工具Tool
+/**YEngine2D
  * author：YYC
  * date：2013-12-21
  * email：395976266@qq.com
