@@ -96,13 +96,6 @@
 
                 this.ye___canvas = canvas;
                 this.ye___getContext();
-
-                if (!this.ye___graphics) {
-                    this.ye___graphics = YE.Graphics.create(this.getContext());
-                }
-                else {
-                    this.ye___graphics.setContext(this.getContext());
-                }
             },
             setWidth: function (width) {
                 this.ye___canvas.width = width;
@@ -119,6 +112,10 @@
                 return this.ye___context;
             },
             getGraphics: function () {
+                if (!this.ye___graphics) {
+                    this.ye___graphics = YE.Graphics.create(this.getContext());
+                }
+
                 return this.ye___graphics;
             },
             change: function () {

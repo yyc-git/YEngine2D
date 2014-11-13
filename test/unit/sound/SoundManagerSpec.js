@@ -21,6 +21,33 @@ describe("SoundManager", function () {
         testTool.judgeSingleInstance(YE.SoundManager);
     });
 
+    describe("createSound", function () {
+        var fakeSound = null;
+
+        beforeEach(function () {
+            fakeSound = {};
+            sandbox.stub(YE.YSoundEngine, "create");
+        });
+        afterEach(function () {
+        });
+
+        it("委托声音引擎加载声音", function () {
+            var urlArr = ["a.mp3"],
+                onload = function () {
+                },
+                onerror = function () {
+                };
+
+            manager.createSound(urlArr, onload, onerror);
+
+            expect(YE.YSoundEngine.create.args[0][0]).toEqual({
+                urlArr: urlArr,
+                onload: onload,
+                onerror: onerror
+            });
+        });
+    });
+
     describe("play", function () {
         beforeEach(function () {
         });

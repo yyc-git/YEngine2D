@@ -19,7 +19,7 @@ describe("YSoundEngine", function () {
 
     describe("initWhenCreate", function () {
         function setParam(config){
-            engine.ye_urlArr = config.url;
+            engine.ye_urlArr = config.urlArr;
             engine.ye_onload = config.onload;
             engine.ye_onerror = config.onerror;
         }

@@ -84,7 +84,25 @@ describe("Layer.js", function () {
     });
 
     describe("getGraphics", function () {
-        it("返回graphics实例", function () {
+        it("如果没有创建Graphics实例，则创建并返回", function () {
+            var fakeContext = {};
+            var fakeGraphics = {a: 1};
+            layer.ye___graphics = null;
+            sandbox.stub(YE.Graphics, "create").returns(fakeGraphics);
+            sandbox.stub(layer, "getContext").returns(fakeContext);
+
+            var graphics = layer.getGraphics();
+
+            expect(YE.Graphics.create).toCalledWith(fakeContext);
+            expect(graphics).toEqual(fakeGraphics);
+        });
+        it("否则直接返回graphics实例", function () {
+            var fakeGraphics = {a: 1};
+            layer.ye___graphics = fakeGraphics;
+
+            var graphics = layer.getGraphics();
+
+            expect(graphics).toEqual(fakeGraphics);
         });
     });
 
@@ -256,7 +274,6 @@ describe("Layer.js", function () {
                 it("根据传入新的canvas的id来获得新的canvas", function () {
                     var canvasId = "a";
 
-
                     layer.setCanvasById(canvasId);
 
                     expect(layer.ye___canvas).toEqual(fakeCanvas);
@@ -266,53 +283,7 @@ describe("Layer.js", function () {
 
                     expect(layer.getContext()).toEqual(fakeContext);
                 });
-                it("如果没有创建Graphics实例，则创建之", function () {
-                    var fakeGraphics = {a: 1};
-                    layer.ye___graphics = null;
-                    sandbox.stub(YE.Graphics, "create").returns(fakeGraphics);
-
-                    layer.setCanvasById("a");
-
-                    expect(YE.Graphics.create).toCalledWith(fakeContext);
-                    expect(layer.getGraphics()).toEqual(fakeGraphics);
-                });
-                it("否则，则更新Graphics示例的context", function () {
-                    layer.ye___graphics = {
-                        setContext: sandbox.stub()
-                    };
-
-                    layer.setCanvasById("a");
-
-                    expect(layer.ye___graphics.setContext).toCalledWith(fakeContext);
-                });
-//        it("创建Graphics实例", function () {
-//            layer.init(null);
-//
-//            expect(layer.getGraphics()).toBeInstanceOf(YE.Graphics);
-//        });
             });
-            beforeEach(function () {
-
-            });
-
-//                function getFakeCanvas(layer) {
-//                    sandbox.stub(layer, "ye___canvas",
-//                        {
-//                            getContext: function () {
-//                                return {};
-//                            },
-//                            style: {
-//                                position: null
-//                            }
-//                        }
-//                    );
-//                }
-//
-//                beforeEach(function () {
-//                    getFakeCanvas(layer);
-//                });
-
-
         });
 
         describe("setWidth", function () {

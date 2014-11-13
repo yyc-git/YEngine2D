@@ -1,4 +1,4 @@
-/**YSoundEngine 声音引擎
+/**YSoundEngine 声音引擎，负责声音加载，提供声音底层api
  * author：YYC
  * date：2014-05-26
  * email：395976266@qq.com
@@ -8,7 +8,7 @@
 (function () {
     YE.YSoundEngine = YYC.Class({
         Init: function (config) {
-            this.ye_urlArr = config.url;
+            this.ye_urlArr = config.urlArr;
             this.ye_onload = config.onload;
             this.ye_onerror = config.onerror;
         },

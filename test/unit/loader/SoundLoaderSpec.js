@@ -33,71 +33,64 @@ describe("SoundLoader", function () {
     });
 
     describe("ye_P_load", function () {
-        describe("调用YSoundEngine加载声音", function () {
-            var fakeSound = null;
+        var fakeSoundManager = null;
+        
+        beforeEach(function () {
+            fakeSoundManager = sandbox.createStubObj("createSound");
+            sandbox.stub(YE.SoundManager, "getInstance").returns(fakeSoundManager);
+        });
+        
+        it("委托SoundManager->createSound加载声音", function () {
+            var urlArr = [];
+
+            loader.ye_P_load(urlArr);
+
+            expect(fakeSoundManager.createSound).toCalledWith(urlArr);
+        });
+        
+        describe("测试onload", function () {
+            var fakeLoaderManager = null;
 
             beforeEach(function () {
-                fakeSound = {};
-                sandbox.stub(YE.YSoundEngine, "create");
-            });
-            afterEach(function () {
+                fakeLoaderManager = sandbox.createSpyObj("onResLoaded");
+                sandbox.stub(YE.LoaderManager, "getInstance").returns(fakeLoaderManager);
             });
 
+            it("调用LoaderManager的onResLoaded方法", function () {
+                loader.ye_P_load(["../a.mp3"]);
+                fakeSoundManager.createSound.args[0][1].call(loader, null);
 
-            it("设置声音的加载路径", function () {
-                var fakeSoundUrl = ["../a.mp3"];
+                expect(fakeLoaderManager.onResLoaded).toCalledOnce();
+            });
+            it("将声音对象加入到容器中。同一个key可对应多个声音对象", function () {
+                var fakeSoundUrl = ["../a.mp3"],
+                    fakeSoundId = "a";
+                sandbox.stub(loader.ye_P_container, "appendChild");
 
-                loader.ye_P_load(fakeSoundUrl);
+                loader.ye_P_load(fakeSoundUrl, fakeSoundId);
+                fakeSoundManager.createSound.args[0][1].call(loader, null);
 
-                expect(YE.YSoundEngine.create.args[0][0].url).toEqual(fakeSoundUrl);
+                expect(loader.ye_P_container.appendChild).toCalledWith(fakeSoundId, loader);
+            });
+        });
+
+        describe("测试onerror", function () {
+            var fakeLoaderManager = null;
+
+            beforeEach(function () {
+                fakeLoaderManager = sandbox.createSpyObj("onResError");
+                sandbox.stub(YE.LoaderManager, "getInstance").returns(fakeLoaderManager);
             });
 
-            describe("测试audio的事件绑定", function () {
-                describe("测试onload", function () {
-                    var fakeLoaderManager = null;
-
-                    beforeEach(function () {
-                        fakeLoaderManager = sandbox.createSpyObj("onResLoaded");
-                        sandbox.stub(YE.LoaderManager, "getInstance").returns(fakeLoaderManager);
-                    });
-
-                    it("调用LoaderManager的onResLoaded方法", function () {
-                        loader.ye_P_load(["../a.mp3"]);
-                        YE.YSoundEngine.create.args[0][0].onload.call(fakeSound, null);
-
-                        expect(fakeLoaderManager.onResLoaded).toCalledOnce();
-                    });
-                    it("将声音对象加入到容器中。同一个key可对应多个声音对象", function () {
-                        var fakeSoundUrl = ["../a.mp3"],
-                            fakeSoundId = "a";
-                        sandbox.stub(loader.ye_P_container, "appendChild");
-
-                        loader.ye_P_load(fakeSoundUrl, fakeSoundId);
-                        YE.YSoundEngine.create.args[0][0].onload.call(fakeSound, null);
-
-                        expect(loader.ye_P_container.appendChild).toCalledWith(fakeSoundId, fakeSound);
-                    });
+            it("调用LoaderManager的onResError方法，给出错误的code信息", function () {
+                sandbox.stub(loader, "error", {
+                    code: 4
                 });
 
-                describe("测试onerror", function () {
-                    var fakeLoaderManager = null;
+                loader.ye_P_load(["../a.mp3"]);
+                fakeSoundManager.createSound.args[0][2].call(loader, null);
 
-                    beforeEach(function () {
-                        fakeLoaderManager = sandbox.createSpyObj("onResError");
-                        sandbox.stub(YE.LoaderManager, "getInstance").returns(fakeLoaderManager);
-                    });
-
-                    it("调用LoaderManager的onResError方法，给出错误的code信息", function () {
-                        sandbox.stub(fakeSound, "error", {
-                            code: 4
-                        });
-
-                        loader.ye_P_load(["../a.mp3"]);
-                        YE.YSoundEngine.create.args[0][0].onerror.call(fakeSound, null);
-
-                        expect(fakeLoaderManager.onResError).toCalledOnce();
-                    });
-                });
+                expect(fakeLoaderManager.onResError).toCalledOnce();
             });
         });
     });

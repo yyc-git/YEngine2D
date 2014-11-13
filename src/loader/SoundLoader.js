@@ -16,15 +16,12 @@
             ye_P_load: function (urlArr, key) {
                 var self = this;
 
-                YE.YSoundEngine.create({
-                    url: urlArr,
-                    onload: function () {
-                        YE.LoaderManager.getInstance().onResLoaded();
-                        self.ye_P_container.appendChild(key, this);
-                    },
-                    onerror: function (code) {
-                        YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：code" + code);
-                    }
+                YE.SoundManager.getInstance().createSound(urlArr, function () {
+                    YE.LoaderManager.getInstance().onResLoaded();
+                    self.ye_P_container.appendChild(key, this);
+
+                }, function (code) {
+                    YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：code" + code);
                 });
             }
         },
