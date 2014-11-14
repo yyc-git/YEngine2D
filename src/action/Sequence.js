@@ -7,6 +7,7 @@
  * homepage:
  * license: MIT
  */
+(function(){
 YE.Sequence = YYC.Class(YE.Control, {
     Init: function () {
         this.base();
@@ -94,3 +95,5 @@ YE.Sequence = YYC.Class(YE.Control, {
         }
     }
 });
+    });
+}());

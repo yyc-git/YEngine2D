@@ -7,47 +7,49 @@
  * homepage:
  * license: MIT
  */
-YE.Control = YYC.AClass(YE.ActionInterval, {
-    Init: function () {
-        this.base();
-    },
-    Protected: {
-        Virtual: {
-            ye_P_iterate: function (method, arg) {
-                var actions = this.getInnerActions();
+(function () {
+    YE.Control = YYC.AClass(YE.ActionInterval, {
+        Init: function () {
+            this.base();
+        },
+        Protected: {
+            Virtual: {
+                ye_P_iterate: function (method, arg) {
+                    var actions = this.getInnerActions();
 
-                actions.map.apply(actions, arguments);
+                    actions.map.apply(actions, arguments);
+                }
+            }
+        },
+        Public: {
+            init: function () {
+                this.ye_P_iterate("init");
+            },
+            onEnter: function () {
+                this.ye_P_iterate("onEnter");
+            },
+            onExit: function () {
+                this.ye_P_iterate("onExit");
+            },
+            setTarget: function (target) {
+                this.base(target);
+
+                this.ye_P_iterate("setTarget", [target]);
+            },
+            reverse: function () {
+                this.ye_P_iterate("reverse");
+
+                return this;
+            },
+            reset: function () {
+                this.base();
+
+                this.ye_P_iterate("reset");
+            }
+        },
+        Abstract: {
+            getInnerActions: function () {
             }
         }
-    },
-    Public: {
-        init: function () {
-            this.ye_P_iterate("init");
-        },
-        onEnter: function () {
-            this.ye_P_iterate("onEnter");
-        },
-        onExit: function () {
-            this.ye_P_iterate("onExit");
-        },
-        setTarget: function (target) {
-            this.base(target);
-
-            this.ye_P_iterate("setTarget", [target]);
-        },
-        reverse: function () {
-            this.ye_P_iterate("reverse");
-
-            return this;
-        },
-        reset: function () {
-            this.base();
-
-            this.ye_P_iterate("reset");
-        }
-    },
-    Abstract: {
-        getInnerActions: function () {
-        }
-    }
-});
+    });
+}());

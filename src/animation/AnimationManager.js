@@ -7,15 +7,17 @@
  * homepage:
  * license: MIT
  */
-YE.AnimationManager = YYC.Class(YE.CollectionManager, {
-    Init: function () {
-        this.base();
-    },
-    Public: {
-    },
-    Static: {
-        create: function () {
-            return new this();
+(function(){
+    YE.AnimationManager = YYC.Class(YE.CollectionManager, {
+        Init: function () {
+            this.base();
+        },
+        Public: {
+        },
+        Static: {
+            create: function () {
+                return new this();
+            }
         }
-    }
-});
+    });
+}());

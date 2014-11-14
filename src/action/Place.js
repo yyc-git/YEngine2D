@@ -7,43 +7,45 @@
  * homepage:
  * license: MIT
  */
-YE.Place = YYC.Class(YE.ActionInstant, {
-    Init: function (x, y) {
-        this.base();
+(function(){
+    YE.Place = YYC.Class(YE.ActionInstant, {
+        Init: function (x, y) {
+            this.base();
 
-        this.ye___posX = x;
-        this.ye___posY = y;
-    },
-    Private: {
-        ye___posX: null,
-        ye___posY: null
-    },
-    Public: {
-        update: function (time) {
-            var target = null;
-
-            target = this.getTarget();
-
-            target.setPositionX(this.ye___posX);
-            target.setPositionY(this.ye___posY);
-
-            this.finish();
+            this.ye___posX = x;
+            this.ye___posY = y;
         },
-        copy: function () {
-            return YE.Place.create(this.ye___posX, this.ye___posY);
+        Private: {
+            ye___posX: null,
+            ye___posY: null
         },
-        reverse: function () {
-            this.ye___posX = -this.ye___posX;
-            this.ye___posY = -this.ye___posY;
+        Public: {
+            update: function (time) {
+                var target = null;
 
-            return this;
-        }
-    },
-    Static: {
-        create: function (x, y) {
-            var action = new this(x, y);
+                target = this.getTarget();
 
-            return action;
+                target.setPositionX(this.ye___posX);
+                target.setPositionY(this.ye___posY);
+
+                this.finish();
+            },
+            copy: function () {
+                return YE.Place.create(this.ye___posX, this.ye___posY);
+            },
+            reverse: function () {
+                this.ye___posX = -this.ye___posX;
+                this.ye___posY = -this.ye___posY;
+
+                return this;
+            }
+        },
+        Static: {
+            create: function (x, y) {
+                var action = new this(x, y);
+
+                return action;
+            }
         }
-    }
-});
+    });
+}());

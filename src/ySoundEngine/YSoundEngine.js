@@ -97,12 +97,10 @@
                 this.ye_audio = new Audio();
 
                 this.ye_audio.addEventListener("canplaythrough", function () {
-//                    self.ye_onload.call(self, null);
                     self.ye_onload();
                 }, false);
                 this.ye_audio.addEventListener("error", function () {
-//                    self.ye_onerror.call(self, self.ye_audio.error.code);
-                    self.ye_onload(self.ye_audio.error.code);
+                    self.ye_onerror(self.ye_audio.error.code);
                 }, false);
 //
 //                audio.autoplay = false;
@@ -110,8 +108,8 @@
 //                audio.autobuffer = true;
 
                 /*!
-                audio在Chrome下必须被reloaded，否则只会播放一次
-                audio在Firefox下不能被reloaded，否则会延迟
+                 audio在Chrome下必须被reloaded，否则只会播放一次
+                 audio在Firefox下不能被reloaded，否则会延迟
                  */
                 this.ye_audio.addEventListener("ended", function () {
                     if (YE.Tool.judge.browser.isChrome()) {
