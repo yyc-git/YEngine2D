@@ -7,38 +7,40 @@
  * homepage:
  * license: MIT
  */
-YE.Node = YYC.AClass(YE.Entity, {
-    Private: {
-        ye_parent: null,
-        ye_zOrder: 0,
+(function(){
+    YE.Node = YYC.AClass(YE.Entity, {
+        Private: {
+            ye_parent: null,
+            ye_zOrder: 0,
 
-        ye_setZOrder: function (zOrder) {
-            this.ye_zOrder = zOrder;
-        }
-    },
-    Public: {
-        getParent: function () {
-            return this.ye_parent;
+            ye_setZOrder: function (zOrder) {
+                this.ye_zOrder = zOrder;
+            }
         },
-        getZOrder: function () {
-            return this.ye_zOrder;
-        },
-
-        Virtual: {
-            init: function (parent) {
-                this.ye_parent = parent;
+        Public: {
+            getParent: function () {
+                return this.ye_parent;
+            },
+            getZOrder: function () {
+                return this.ye_zOrder;
             },
 
-            //*钩子
+            Virtual: {
+                init: function (parent) {
+                    this.ye_parent = parent;
+                },
 
-            onStartLoop: function () {
-            },
-            onEndLoop: function () {
-            },
-            onEnter: function () {
-            },
-            onExit: function () {
+                //*钩子
+
+                onStartLoop: function () {
+                },
+                onEndLoop: function () {
+                },
+                onEnter: function () {
+                },
+                onExit: function () {
+                }
             }
         }
-    }
-});
+    });
+}());

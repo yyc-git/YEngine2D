@@ -7,27 +7,29 @@
  * homepage:
  * license: MIT
  */
-YE.ActionInterval = YYC.AClass(YE.Action, {
-    Init: function () {
-        this.base();
-    },
-    Private: {
-        ye__isStop: false
-    },
-    Public: {
-        start: function () {
-            this.ye__isStop = false;
-        },
-        reset: function () {
+(function(){
+    YE.ActionInterval = YYC.AClass(YE.Action, {
+        Init: function () {
             this.base();
+        },
+        Private: {
+            ye__isStop: false
+        },
+        Public: {
+            start: function () {
+                this.ye__isStop = false;
+            },
+            reset: function () {
+                this.base();
 
-            this.ye__isStop = false;
-        },
-        stop: function () {
-            this.ye__isStop = true;
-        },
-        isStop: function () {
-            return this.ye__isStop;
+                this.ye__isStop = false;
+            },
+            stop: function () {
+                this.ye__isStop = true;
+            },
+            isStop: function () {
+                return this.ye__isStop;
+            }
         }
-    }
-});
+    });
+}());

@@ -7,48 +7,50 @@
  * homepage:
  * license: MIT
  */
-YE.RepeatForever = YYC.Class(YE.Control, {
-    Init: function (action) {
-        this.base();
+(function(){
+    YE.RepeatForever = YYC.Class(YE.Control, {
+        Init: function (action) {
+            this.base();
 
-        this.ye____innerAction = action;
-    },
-    Private: {
-        ye____innerAction: null
-    },
-    Public: {
-        update: function (time) {
-            this.ye____innerAction.update(time);
+            this.ye____innerAction = action;
+        },
+        Private: {
+            ye____innerAction: null
+        },
+        Public: {
+            update: function (time) {
+                this.ye____innerAction.update(time);
 
-            if (this.ye____innerAction.isFinish()) {
-                this.ye____innerAction.reset();
+                if (this.ye____innerAction.isFinish()) {
+                    this.ye____innerAction.reset();
+                }
+            },
+            isFinish: function () {
+                return false;
+            },
+            copy: function () {
+                return YE.RepeatForever.create(this.ye____innerAction.copy());
+            },
+            start: function () {
+                this.base();
+
+                this.ye____innerAction.start();
+            },
+            stop: function () {
+                this.base();
+
+                this.ye____innerAction.stop();
+            },
+            getInnerActions: function () {
+                return [this.ye____innerAction];
             }
         },
-        isFinish: function () {
-            return false;
-        },
-        copy: function () {
-            return YE.RepeatForever.create(this.ye____innerAction.copy());
-        },
-        start: function () {
-            this.base();
+        Static: {
+            create: function (action) {
+                var repeat = new this(action);
 
-            this.ye____innerAction.start();
-        },
-        stop: function () {
-            this.base();
-
-            this.ye____innerAction.stop();
-        },
-        getInnerActions: function () {
-            return [this.ye____innerAction];
+                return repeat;
+            }
         }
-    },
-    Static: {
-        create: function (action) {
-            var repeat = new this(action);
-
-            return repeat;
-        }
-    }
-});
+    });
+}());

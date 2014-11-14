@@ -7,14 +7,16 @@
  * homepage:
  * license: MIT
  */
-YE.ActionInstant = YYC.AClass(YE.Action, {
-    Public: {
-        isStop: function () {
-            return false;
-        },
-        start: function () {
-        },
-        stop: function () {
+(function(){
+    YE.ActionInstant = YYC.AClass(YE.Action, {
+        Public: {
+            isStop: function () {
+                return false;
+            },
+            start: function () {
+            },
+            stop: function () {
+            }
         }
-    }
-});
+    });
+}());
