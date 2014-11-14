@@ -100,7 +100,7 @@
                     self.ye_onload();
                 }, false);
                 this.ye_audio.addEventListener("error", function () {
-                    self.ye_onload(self.ye_audio.error.code);
+                    self.ye_onerror(self.ye_audio.error.code);
                 }, false);
 //
 //                audio.autoplay = false;

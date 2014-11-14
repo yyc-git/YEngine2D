@@ -63,8 +63,8 @@ describe("YSoundEngine", function () {
                 beforeEach(function () {
                 });
 
-                it("绑定onload到canplaythrough事件，使其this指向engine", function () {
-                    var fakeOnload = sandbox.createSpyObj("call");
+                it("绑定onload到canplaythrough事件", function () {
+                    var fakeOnload = sandbox.stub();
                     setParam({
                         onload: fakeOnload
                     });
@@ -73,7 +73,6 @@ describe("YSoundEngine", function () {
                     fakeSound.addEventListener.firstCall.callArgOn(1, fakeSound);
 
                     expect(fakeSound.addEventListener.firstCall.args[0]).toEqual("canplaythrough");
-                    expect(fakeOnload.call.args[0]).toEqual([engine, null]);
                 });
 
                 describe("绑定ended事件，重置声音位置", function () {
@@ -116,8 +115,8 @@ describe("YSoundEngine", function () {
                         expect(YE.error).toCalledOnce();
                     });
                 });
-                it("绑定onerror到error事件，使其this指向engine，传入errorCode", function () {
-                    var fakeOnerror = sandbox.createSpyObj("call");
+                it("绑定onerror到error事件，传入errorCode", function () {
+                    var fakeOnerror = sandbox.stub();
                     fakeSound.error = {code: 4};
                     setParam({
                         onerror: fakeOnerror
@@ -127,7 +126,7 @@ describe("YSoundEngine", function () {
 
                     fakeSound.addEventListener.secondCall.callArgOn(1, fakeSound);
                     expect(fakeSound.addEventListener.secondCall.args[0]).toEqual("error");
-                    expect(fakeOnerror.call.args[0]).toEqual([engine, fakeSound.error.code]);
+                    expect(fakeOnerror).toCalledWith(fakeSound.error.code);
                 });
             });
 
