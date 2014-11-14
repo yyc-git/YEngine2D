@@ -10,7 +10,7 @@
  homepage: 
  repository: https://github.com/yyc-git/YEngine2D
  license: MIT
- date: 2014-11-13
+ date: 2014-11-14
 */
 (function () {
     function _extend(destination, source) {
@@ -231,7 +231,6 @@
         },
         ye_engineFilePaths: [
             "import/yeQuery.js",
-            "import/YOOP.js",
             "import/jsExtend.js",
 
             "tool/Tool.js",
@@ -1123,7 +1122,7 @@ YE.Control = YYC.AClass(YE.ActionInterval, {
             ye_loadedUrl: null
         },
         Protected: {
-            ye_P_container: null   ,
+            ye_P_container: null,
 
             Abstract: {
                 ye_P_load: function () {
@@ -1886,151 +1885,6 @@ YE.Sequence = YYC.Class(YE.Control, {
         }
     }
 });
-
-//
-///** Runs actions sequentially, one after another
-// * @class
-// * @extends cc.ActionInterval
-// */
-//cc.Sequence = cc.ActionInterval.extend(/** @lends cc.Sequence# */{
-//    ye_actions: null,
-//    ye_split: null,
-//    ye_last: 0,
-//
-//    /**
-//     * Constructor
-//     */
-//    ctor: function () {
-//        this.ye_actions = [];
-//    },
-//
-//    /** initializes the action <br/>
-//     * @param {cc.FiniteTimeAction} actionOne
-//     * @param {cc.FiniteTimeAction} actionTwo
-//     * @return {Boolean}
-//     */
-//    initOneTwo: function (actionOne, actionTwo) {
-//        cc.Assert(actionOne != null, "Sequence.initOneTwo");
-//        cc.Assert(actionTwo != null, "Sequence.initOneTwo");
-//
-//        var one = actionOne.getDuration();
-//        var two = actionTwo.getDuration();
-//        if (isNaN(one) || isNaN(two)) {
-//            console.log(actionOne);
-//            console.log(actionTwo);
-//        }
-//        var d = actionOne.getDuration() + actionTwo.getDuration();
-//        this.initWithDuration(d);
-//
-//        this.ye_actions[0] = actionOne;
-//        this.ye_actions[1] = actionTwo;
-//
-//        return true;
-//    },
-//
-//    /**
-//     * @param {cc.Node} target
-//     */
-//    startWithTarget: function (target) {
-//        cc.ActionInterval.prototype.startWithTarget.call(this, target);
-//        //this.ye_super(target);
-//        this.ye_split = this.ye_actions[0].getDuration() / this.ye_duration;
-//        this.ye_last = -1;
-//    },
-//
-//    /**
-//     * stop the action
-//     */
-//    stop: function () {
-//        // Issue #1305
-//        if (this.ye_last != -1) {
-//            this.ye_actions[this.ye_last].stop();
-//        }
-//        cc.Action.prototype.stop.call(this);
-//    },
-//
-//    /**
-//     * @param {Number} time  time in seconds
-//     */
-//    update: function (time) {
-//        var new_t, found = 0;
-//        if (time < this.ye_split) {
-//            // action[0]
-//            //found = 0;
-//            new_t = (this.ye_split) ? time / this.ye_split : 1;
-//        } else {
-//            // action[1]
-//            found = 1;
-//            new_t = (this.ye_split == 1) ? 1 : (time - this.ye_split) / (1 - this.ye_split);
-//
-//            if (this.ye_last == -1) {
-//                // action[0] was skipped, execute it.
-//                this.ye_actions[0].startWithTarget(this.ye_target);
-//                this.ye_actions[0].update(1);
-//                this.ye_actions[0].stop();
-//            }
-//            if (!this.ye_last) {
-//                // switching to action 1. stop action 0.
-//                this.ye_actions[0].update(1);
-//                this.ye_actions[0].stop();
-//            }
-//        }
-//
-//        if (this.ye_last != found) {
-//            this.ye_actions[found].startWithTarget(this.ye_target);
-//        }
-//        this.ye_actions[found].update(new_t);
-//        this.ye_last = found;
-//    },
-//
-//    /**
-//     * @return {cc.ActionInterval}
-//     */
-//    reverse: function () {
-//        return cc.Sequence.ye_actionOneTwo(this.ye_actions[1].reverse(), this.ye_actions[0].reverse());
-//    },
-//
-//    /**
-//     * to copy object with deep copy.
-//     * @return {object}
-//     */
-//    copy: function () {
-//        return cc.Sequence.ye_actionOneTwo(this.ye_actions[0].copy(), this.ye_actions[1].copy());
-//    }
-//});
-///** helper constructor to create an array of sequenceable actions
-// * @param {Array|cc.FiniteTimeAction} tempArray
-// * @return {cc.FiniteTimeAction}
-// * @example
-// * // example
-// * // create sequence with actions
-// * var seq = cc.Sequence.create(act1, act2);
-// *
-// * // create sequence with array
-// * var seq = cc.Sequence.create(actArray);
-// */
-//cc.Sequence.create = function (/*Multiple Arguments*/tempArray) {
-//    var paraArray = (tempArray instanceof Array) ? tempArray : arguments;
-//    var prev = paraArray[0];
-//    for (var i = 1; i < paraArray.length; i++) {
-//        if (paraArray[i]) {
-//            prev = cc.Sequence.ye_actionOneTwo(prev, paraArray[i]);
-//        }
-//    }
-//    return prev;
-//};
-//
-///** creates the action
-// * @param {cc.FiniteTimeAction} actionOne
-// * @param {cc.FiniteTimeAction} actionTwo
-// * @return {cc.Sequence}
-// * @private
-// */
-//cc.Sequence.ye_actionOneTwo = function (actionOne, actionTwo) {
-//    var sequence = new cc.Sequence();
-//    sequence.initOneTwo(actionOne, actionTwo);
-//    return sequence;
-//};
 YE.Spawn = YYC.Class(YE.Control, {
     Init: function (actionArr) {
         this.base();
@@ -4119,30 +3973,38 @@ namespace("YE").Event = {
             getCurrentLoadedCount: function () {
                 return this.ye_currentLoadedCount;
             },
-            preload: function (resources) {
+            preload: function (resources, isSerialLoad) {
                 var self = this;
 
-                resources.forEach(function (res) {
-                    switch (res.type) {
-                        case "image":
-                            YE.ImgLoader.getInstance().load(res.url, res.id);
-                            self.ye_resCount += 1;
-                            break;
-                        case "json":
-                            YE.JsonLoader.getInstance().load(res.url, res.id);
-                            self.ye_resCount += 1;
-                            break;
-                        case "sound":
-                            YE.SoundLoader.getInstance().load(res.url, res.id);
-                            self.ye_resCount += 1;
-                            break;
-                        default:
-                            YE.error(true, "type错误");
-                            break;
-                    }
-                });
+                if(isSerialLoad){
+                    YE.SoundLoader.getInstance().add(resources);
+                    self.ye_resCount += resources.length;
+                }
+                else{
+                    resources.forEach(function (res) {
+                        switch (res.type) {
+                            case "image":
+                                YE.ImgLoader.getInstance().load(res.url, res.id);
+                                self.ye_resCount += 1;
+                                break;
+                            case "json":
+                                YE.JsonLoader.getInstance().load(res.url, res.id);
+                                self.ye_resCount += 1;
+                                break;
+                            case "sound":
+                                YE.SoundLoader.getInstance().load(res.url, res.id);
+                                self.ye_resCount += 1;
+                                break;
+                            default:
+                                YE.error(true, "type错误");
+                                break;
+                        }
+                    });
+                }
 
                 this.ye_isFinishLoad();
+
+                YE.SoundLoader.getInstance().load();
             },
             reset: function () {
                 this.ye_resCount = 0;
@@ -4177,15 +4039,61 @@ namespace("YE").Event = {
     YE.SoundLoader = YYC.Class(YE.Loader, {
         Init: function () {
             this.base();
+
+            this.ye__resArr = YE.Collection.create();
+        },
+        Private: {
+            ye__resArr: null
         },
         Protected: {
-            ye_P_load: function (urlArr, key) {
+            ye_P_load: function (url, key) {
                 var self = this;
 
-                YE.SoundManager.getInstance().createSound(urlArr, function () {
+                YE.SoundManager.getInstance().createSound(url, function () {
                     YE.LoaderManager.getInstance().onResLoaded();
                     self.ye_P_container.appendChild(key, this);
 
+                }, function (code) {
+                    YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：code" + code);
+                });
+            }
+        },
+        Public: {
+            add: function (resArr) {
+                this.ye__resArr.addChilds(resArr);
+            },
+            load: function () {
+//                var key = id ? id : url;
+//
+//                if (this.ye_loadedUrl.hasChild(url)) {
+//                    YE.LoaderManager.getInstance().onResLoaded();
+//                    return this.get(key);
+//                }
+//
+//                this.ye_loadedUrl.addChild(url);
+//
+//                this.ye_P_load(url, key);
+                var self = this;
+
+                if (this.ye__resArr.getCount() === 0) {
+                    return;
+                }
+
+                var urlArr = this.ye__resArr.getChildAt(0);
+                this.ye__resArr.removeChildAt(0);
+
+                if (this.ye_loadedUrl.hasChild(urlArr.id)) {
+                    YE.LoaderManager.getInstance().onResLoaded();
+//                    return this.get(key);
+                    this.load();
+                    return;
+                }
+
+
+                YE.SoundManager.getInstance().createSound(urlArr.url, function () {
+                    YE.LoaderManager.getInstance().onResLoaded();
+                    self.ye_P_container.appendChild(urlArr.id, this);
+                    self.load();
                 }, function (code) {
                     YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：code" + code);
                 });
@@ -4212,7 +4120,9 @@ namespace("YE").Event = {
             ye_counter: 0
         },
         Public: {
-            createSound: function (urlArr, onload, onerror) {
+            createSound: function (url, onload, onerror) {
+                var urlArr = YE.Tool.judge.isArray(url) ? url : [url];
+
                 YE.YSoundEngine.create({
                     urlArr: urlArr,
                     onload: onload,
@@ -5647,10 +5557,12 @@ namespace("YE").Event = {
                 this.ye_audio = new Audio();
 
                 this.ye_audio.addEventListener("canplaythrough", function () {
-                    self.ye_onload.call(self, null);
+//                    self.ye_onload.call(self, null);
+                    self.ye_onload();
                 }, false);
                 this.ye_audio.addEventListener("error", function () {
-                    self.ye_onerror.call(self, self.ye_audio.error.code);
+//                    self.ye_onerror.call(self, self.ye_audio.error.code);
+                    self.ye_onload(self.ye_audio.error.code);
                 }, false);
 //
 //                audio.autoplay = false;
@@ -5658,10 +5570,8 @@ namespace("YE").Event = {
 //                audio.autobuffer = true;
 
                 /*!
-                 Audio still doesn't work consistently across all browsers, as of right now:
-
-                 An element must be reloaded in Chrome or it will only play once
-                 An element must not be reloaded in Firefox or there will be a delay
+                audio在Chrome下必须被reloaded，否则只会播放一次
+                audio在Firefox下不能被reloaded，否则会延迟
                  */
                 this.ye_audio.addEventListener("ended", function () {
                     if (YE.Tool.judge.browser.isChrome()) {
@@ -5671,12 +5581,12 @@ namespace("YE").Event = {
                         this.currentTime = 0;
                     }
                     else {
-                        YE.error(true, "目前仅支持chrome、firefox浏览器");
+                        YE.error(true, "目前仅支持Chrome、Firefox浏览器");
                     }
                 }, false);
 
                 this.ye_load();
-//
+
                 setTimeout(function () {
                 }, 50);
             },

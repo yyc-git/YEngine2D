@@ -18,7 +18,9 @@
             ye_counter: 0
         },
         Public: {
-            createSound: function (urlArr, onload, onerror) {
+            createSound: function (url, onload, onerror) {
+                var urlArr = YE.Tool.judge.isArray(url) ? url : [url];
+
                 YE.YSoundEngine.create({
                     urlArr: urlArr,
                     onload: onload,

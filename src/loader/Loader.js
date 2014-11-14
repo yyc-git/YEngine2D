@@ -19,7 +19,7 @@
             ye_loadedUrl: null
         },
         Protected: {
-            ye_P_container: null   ,
+            ye_P_container: null,
 
             Abstract: {
                 ye_P_load: function () {

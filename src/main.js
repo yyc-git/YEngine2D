@@ -226,7 +226,6 @@
         },
         ye_engineFilePaths: [
             "import/yeQuery.js",
-            "import/YOOP.js",
             "import/jsExtend.js",
 
             "tool/Tool.js",
