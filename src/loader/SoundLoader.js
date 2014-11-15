@@ -18,12 +18,15 @@
             ye_P_load: function (urlArr, key) {
                 var self = this;
 
-                YE.SoundManager.getInstance().createSound(urlArr, function () {
+//todo  key应该为url?
+
+                YE.SoundManager.getInstance().createSound(urlArr, function (sound) {
                     YE.LoaderManager.getInstance().onResLoaded();
-                    self.ye_P_container.appendChild(key, this);
+                    self.ye_P_container.appendChild(key, sound);
 
                 }, function (code) {
                     YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：code" + code);
+//                    YE.LoaderManager.getInstance().onResError(urlArr, "错误error");
                 });
             }
         },

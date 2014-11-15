@@ -226,7 +226,6 @@
         },
         ye_engineFilePaths: [
             "import/yeQuery.js",
-            "import/YOOP.js",
             "import/jsExtend.js",
 
             "tool/Tool.js",
@@ -286,9 +285,9 @@
             "action/JumpBy.js",
             "action/Place.js",
 
-            "ui/Graphics.js" ,
+            "ui/Graphics.js",
 
-            "ySoundEngine/YSoundEngine.js"
+            "soundEngine/YSoundEngine.js"
         ],
         ye_isLoaded: false,
 
