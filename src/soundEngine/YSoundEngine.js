@@ -1,4 +1,4 @@
-/**YSoundEngine
+/**YSound web audio库
  * author：YYC
  * date：2014-05-26
  * email：395976266@qq.com
@@ -8,14 +8,22 @@
  * license: MIT
  */
 (function () {
+    //todo 增加cache机制
+    //todo 增强浏览器兼容性
+
     var AudioType = {
-        NONE: 0,
-        WEBAUDIO: 1,
-        HTML5AUDIO: 2
-    };
+            NONE: 0,
+            WEBAUDIO: 1,
+            HTML5AUDIO: 2
+        },
+        PlayState = {
+            NONE: 0,
+            PLAYING: 1,
+            END: 2
+        };
     var _audioType = null,
         _ctx = null,
-        _audioInstance = null;
+        _audioObj = null;
 
     _audioTest();
 
@@ -66,10 +74,10 @@
             initWhenCreate: function () {
                 switch (_audioType) {
                     case AudioType.WEBAUDIO:
-                        _audioInstance = WebAudio.create(this.ye_config);
+                        _audioObj = WebAudio.create(this.ye_config);
                         break;
                     case AudioType.HTML5AUDIO:
-                        _audioInstance = Html5Audio.create(this.ye_config);
+                        _audioObj = Html5Audio.create(this.ye_config);
                         break;
                     case AudioType.NONE:
                         YE.log("浏览器不支持Web Audio和Html5 Audio");
@@ -80,10 +88,13 @@
                         break;
                 }
 
-                _audioInstance.load();
+                _audioObj.load();
             },
             play: function () {
-                _audioInstance.play();
+                _audioObj.play();
+            },
+            getPlayState: function () {
+                _audioObj.getPlayState();
             }
         },
         Static: {
@@ -175,6 +186,8 @@
             play: function () {
             },
             load: function () {
+            },
+            getPlayState: function () {
             }
         }
     });
@@ -189,9 +202,11 @@
         },
         Private: {
             ye_buffer: null,
+            ye_bufferSource: null,
             ye_onload: null,
             ye_onerror: null,
             ye_config: null,
+            ye_playState: null,
 
             ye_loadBuffer: function (obj, url) {
 //                // check if the buffer has already been cached
@@ -220,15 +235,15 @@
 
                 // load the buffer from the URL
 
-               YE.$.ajax({
-                   type:"get",
-                   url:url,
-                   dataType:"arraybuffer",
-                   success:function(data){
-                       self.ye_decodeAudioData(data, obj, url);
-                   },
-                   error:function(){
-                       // if there is an error, switch the sound to HTML Audio
+                YE.$.ajax({
+                    type: "get",
+                    url: url,
+                    dataType: "arraybuffer",
+                    success: function (data) {
+                        self.ye_decodeAudioData(data, obj, url);
+                    },
+                    error: function () {
+                        // if there is an error, switch the sound to HTML Audio
 //                    if (obj._webAudio) {
 //                        obj._buffer = true;
 //                        obj._webAudio = false;
@@ -237,36 +252,11 @@
 //                        delete cache[url];
 //                        obj.load();
 //                    }
-                       YE.log("使用Web Audio加载失败！尝试使用Html5 Audio加载");
-                       _audioInstance = Html5Audio.create(self.ye_config);
-                       _audioInstance.load();
-                   }
-               });
-//                
-//                var xhr = new XMLHttpRequest();
-//                xhr.open('GET', url, true);
-//                xhr.responseType = 'arraybuffer';
-//                xhr.onload = function () {
-//                    self.ye_decodeAudioData(xhr.response, obj, url);
-//                };
-//                xhr.onerror = function () {
-//                    // if there is an error, switch the sound to HTML Audio
-////                    if (obj._webAudio) {
-////                        obj._buffer = true;
-////                        obj._webAudio = false;
-////                        obj._audioNode = [];
-////                        delete obj._gainNode;
-////                        delete cache[url];
-////                        obj.load();
-////                    }
-//                    _audioInstance = Html5Audio.create(self.ye_config);
-//                };
-//                try {
-//                    xhr.send();
-//                } catch (e) {
-//                    xhr.onerror();
-//                }
-////                }
+                        YE.log("使用Web Audio加载失败！尝试使用Html5 Audio加载");
+                        _audioObj = Html5Audio.create(self.ye_config);
+                        _audioObj.load();
+                    }
+                });
             },
             ye_decodeAudioData: function (arraybuffer, obj, url) {
                 var self = this;
@@ -291,15 +281,34 @@
         Public: {
             initWhenCreate: function () {
                 this.base();
+
+                this.ye_playState = PlayState.NONE;
             },
             load: function () {
                 this.ye_loadBuffer(this, this.ye_P_url);
             },
             play: function () {
-                var source = _ctx.createBufferSource();
+                var source = _ctx.createBufferSource(),
+                    self = this;
+
+//                有问题！线程阻塞时可能会不触发onended！
+//                因此使用timer代替
+//                source.onended = function(){
+//                    self.ye_status = 2;
+//                };
+
+
                 source.buffer = this.ye_buffer;
                 source.connect(_ctx.destination);
                 source.start(0);
+                this.ye_playState = PlayState.PLAYING;
+
+                setTimeout(function () {
+                    self.ye_playState = PlayState.END;
+                }, this.ye_buffer.duration * 1000);
+            },
+            getPlayState: function () {
+                return this.ye_playState;
             }
         },
         Static: {
@@ -373,6 +382,21 @@
             },
             play: function () {
                 this.ye_audio.play();
+            },
+            getPlayState: function () {
+                var playState = 0;
+
+                if(this.ye_audio.ended){
+                    playState = PlayState.END;
+                }
+                else if(this.ye_audio.currentTime > 0){
+                    playState = PlayState.PLAYING;
+                }
+                else{
+                    playState = PlayState.NONE;
+                }
+
+                return playState;
             }
         },
         Static: {

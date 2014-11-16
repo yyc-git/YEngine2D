@@ -15,7 +15,13 @@
             this.base();
         },
         Private: {
-            ye_counter: 0
+            ye_counter: 0,
+
+            ye_playOnlyOneSimultaneously: function (audioObject) {
+                if (audioObject.getPlayState() !== 1) {
+                    audioObject.play();
+                }
+            }
         },
         Public: {
             play: function (soundId) {
@@ -32,7 +38,7 @@
 
                 audioObject = sound[this.ye_counter];
                 this.ye_counter++;
-                audioObject.play();
+                this.ye_playOnlyOneSimultaneously(audioObject);
             }
         },
         Static: {
