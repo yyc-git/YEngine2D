@@ -227,6 +227,7 @@
         ye_engineFilePaths: [
             "import/yeQuery.js",
             "import/jsExtend.js",
+            "import/YSound.js",
 
             "tool/Tool.js",
 
@@ -285,9 +286,7 @@
             "action/JumpBy.js",
             "action/Place.js",
 
-            "ui/Graphics.js",
-
-            "soundEngine/YSoundEngine.js"
+            "ui/Graphics.js"
         ],
         ye_isLoaded: false,
 

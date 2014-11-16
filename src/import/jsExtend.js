@@ -1,4 +1,4 @@
-﻿/**YEngine2D
+﻿/**jsExtend 扩展js对象
  * author：YYC
  * date：2014-01-01
  * email：395976266@qq.com

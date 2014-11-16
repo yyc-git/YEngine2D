@@ -410,6 +410,6 @@
         }
     });
 
-    YE.YSoundEngine = SoundManager;
+    YE.YSound = SoundManager;
 }());
 

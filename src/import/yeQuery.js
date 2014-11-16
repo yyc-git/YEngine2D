@@ -1,4 +1,4 @@
-/**YEngine2D
+/**YEQuery dom操作和ajax封装库
  * author：YYC
  * date：2014-10-26
  * email：395976266@qq.com

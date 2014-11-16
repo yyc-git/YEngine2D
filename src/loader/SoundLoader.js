@@ -18,7 +18,7 @@
             ye_P_load: function (urlArr, key) {
                 var self = this;
 
-                YE.YSoundEngine.create({
+                YE.YSound.create({
                     urlArr: urlArr,
                     onload: function (sound) {
                         YE.LoaderManager.getInstance().onResLoaded();
@@ -29,6 +29,16 @@
                         YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：" + msg);
                     }
                 });
+//                audio = new Howl({
+//                    urls: urlArr,
+//                    onload: function () {
+//                        YE.LoaderManager.getInstance().onResLoaded();
+//                        self.ye_P_container.appendChild(key, this);
+//                    },
+//                    onloaderror: function () {
+//                        YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：" + msg);
+//                    }
+//                });
             }
         },
         Static: {
