@@ -1,6 +1,6 @@
 /*!
  yEngine2D
- 2D web game engine
+ 2D HTML5 Game Engine
 
  version: 0.1.0
  author: YYC
@@ -10,7 +10,7 @@
  homepage: 
  repository: https://github.com/yyc-git/YEngine2D
  license: MIT
- date: 2014-11-14
+ date: 2014-11-16
 */
 (function () {
     function _extend(destination, source) {
@@ -231,8 +231,8 @@
         },
         ye_engineFilePaths: [
             "import/yeQuery.js",
-            "import/YOOP.js",
             "import/jsExtend.js",
+            "import/YSound.js",
 
             "tool/Tool.js",
 
@@ -291,9 +291,7 @@
             "action/JumpBy.js",
             "action/Place.js",
 
-            "ui/Graphics.js" ,
-
-            "ySoundEngine/YSoundEngine.js"
+            "ui/Graphics.js"
         ],
         ye_isLoaded: false,
 
@@ -559,9 +557,15 @@
 
                 try {
                     xhr.open(type, url, true);
+
+                    if (_isSoundFile(dataType)) {
+                        xhr.responseType = "arraybuffer";
+                    }
+
                     if (type === "GET" || type === "get") {
                         xhr.send(null);
-                    } else if (type === "POST" || type === "post") {
+                    }
+                    else if (type === "POST" || type === "post") {
                         xhr.setRequestHeader("content-type", "application/x-www-form-urlencoded");
                         xhr.send(data);
                     }
@@ -574,13 +578,20 @@
                                 if (success !== null) {//普通文本
                                     success(xhr.responseText);
                                 }
-                            } else if (dataType === "xml" || dataType === "XML") {
+                            }
+                            else if (dataType === "xml" || dataType === "XML") {
                                 if (success !== null) {//接收xml文档
                                     success(xhr.responseXML);
                                 }
-                            } else if (dataType === "json" || dataType === "JSON") {
+                            }
+                            else if (dataType === "json" || dataType === "JSON") {
                                 if (success !== null) {//将json字符串转换为js对象
                                     success(eval("(" + xhr.responseText + ")"));
+                                }
+                            }
+                            else if(_isSoundFile(dataType)){
+                                if (success !== null) {//将json字符串转换为js对象
+                                    success(xhr.response);
                                 }
                             }
                         }
@@ -591,7 +602,7 @@
                 }
             }
 
-            function _createAjax() {
+            function _createAjax(error) {
                 var xhr = null;
                 try {//IE系列浏览器
                     xhr = new ActiveXObject("microsoft.xmlhttp");
@@ -608,6 +619,10 @@
 
             function _isLocalFile(status) {
                 return document.URL.contain("file://") && status === 0;
+            }
+
+            function _isSoundFile(dataType) {
+                return dataType === "arraybuffer";
             }
 
             return ajax;
@@ -2908,7 +2923,7 @@
 (function () {
     var _instance = null;
 
-    var GameStatus = {
+    var GameState = {
         NORMAL: 0,
         PAUSE: 1,
         END: 2
@@ -2943,7 +2958,7 @@
             ye_isRequestAnimFrameLoopAdded: false,
 
             //内部游戏状态
-            ye_gameStatus: null,
+            ye_gameState: null,
             //计时器序号
             ye_timerIndex: 0,
 
@@ -3036,7 +3051,7 @@
                 this.setCurrentScene(scene);
 
                 this.ye_startTime = this.ye_getTimeNow();
-                this.ye_gameStatus = GameStatus.NORMAL;
+                this.ye_gameState = GameState.NORMAL;
 
                 this.ye_startLoop();
             },
@@ -3063,11 +3078,11 @@
             },
             end: function () {
                 this.ye_endNextLoop();
-                this.ye_gameStatus = GameStatus.END;
+                this.ye_gameState = GameState.END;
                 YE.Tool.asyn.clearAllTimer(this.ye_timerIndex);
             },
             pause: function () {
-                if (this.ye_gameStatus === GameStatus.PAUSE) {
+                if (this.ye_gameState === GameState.PAUSE) {
                     return YE.returnForTest;
                 }
 
@@ -3076,16 +3091,16 @@
 
                 this.ye_lastLoopInterval = this.ye_loopInterval;
                 this.ye_endNextLoop();
-                this.ye_gameStatus = GameStatus.PAUSE;
+                this.ye_gameState = GameState.PAUSE;
             },
             resume: function () {
-                if (this.ye_gameStatus !== GameStatus.PAUSE) {
+                if (this.ye_gameState !== GameState.PAUSE) {
                     return YE.returnForTest;
                 }
 
                 this.ye_loopInterval = this.ye_lastLoopInterval;
                 this.ye_restart();
-                this.ye_gameStatus = GameStatus.NORMAL;
+                this.ye_gameState = GameState.NORMAL;
             },
             /**
              * 设置主循环间隔时间
@@ -3108,8 +3123,8 @@
             },
 
             //*供测试使用
-            forTest_getGameStatus: function () {
-                return GameStatus;
+            forTest_getGameState: function () {
+                return GameState;
             },
             forTest_getLoopType: function () {
                 return LoopType;
@@ -3879,6 +3894,406 @@
 }());
 
 (function () {
+    //todo 增加cache机制
+    //todo 增强浏览器兼容性
+
+    var AudioType = {
+            NONE: 0,
+            WEBAUDIO: 1,
+            HTML5AUDIO: 2
+        },
+        PlayState = {
+            NONE: 0,
+            PLAYING: 1,
+            END: 2
+        };
+    var _audioType = null,
+        _ctx = null,
+        _audioObj = null;
+    var AudioBase = null,
+        WebAudio = null,
+        Html5Audio = null;
+
+    _audioDetect();
+
+    function _audioDetect() {
+        try {
+            var contextClass = window.AudioContext ||
+                window.webkitAudioContext ||
+                window.mozAudioContext ||
+                window.oAudioContext ||
+                window.msAudioContext;
+            if (contextClass) {
+                _ctx = new contextClass();
+                _audioType = AudioType.WEBAUDIO;
+            }
+            else {
+                _html5AudioDetect();
+            }
+        }
+        catch (e) {
+            _html5AudioDetect();
+        }
+    }
+
+    function _html5AudioDetect() {
+        if (typeof Audio !== "undefined") {
+            try {
+                new Audio();
+                _audioType = AudioType.HTML5AUDIO;
+            }
+            catch (e) {
+                _audioType = AudioType.NONE;
+            }
+        }
+        else {
+            _audioType = AudioType.HTML5AUDIO;
+        }
+    }
+
+
+    var SoundManager = YYC.Class({
+        Init: function (config) {
+            this.ye_config = config;
+        },
+        Private: {
+            ye_config: null
+        },
+        Public: {
+            initWhenCreate: function () {
+                switch (_audioType) {
+                    case AudioType.WEBAUDIO:
+                        _audioObj = WebAudio.create(this.ye_config);
+                        break;
+                    case AudioType.HTML5AUDIO:
+                        _audioObj = Html5Audio.create(this.ye_config);
+                        break;
+                    case AudioType.NONE:
+                        YE.log("浏览器不支持Web Audio和Html5 Audio");
+                        return YE.returnForTest;
+                        break;
+                    default:
+                        return YE.returnForTest;
+                        break;
+                }
+
+                _audioObj.load();
+            },
+            play: function () {
+                _audioObj.play();
+            },
+            getPlayState: function () {
+                return _audioObj.getPlayState();
+            },
+
+
+            forTest_setAudioObj: function (obj) {
+                _audioObj = obj;
+            },
+            forTest_setAudioType: function (type) {
+                _audioType = type;
+            },
+            forTest_getAudioTypeEnum: function () {
+                return AudioType;
+            },
+            forTest_getPlayStateEnum: function () {
+                return PlayState;
+            },
+            forTest_getAudioBase: function () {
+                return AudioBase;
+            },
+            forTest_getWebAudio: function () {
+                return WebAudio;
+            },
+            forTest_getHtml5Audio: function () {
+                return Html5Audio;
+            }
+        },
+        Static: {
+            create: function (config) {
+                var api = new this(config);
+
+                api.initWhenCreate();
+
+                return api;
+            }
+        }
+    });
+
+    (function () {
+        AudioBase = YYC.AClass({
+            Private: {
+                ye_getCanPlayUrl: function () {
+                    var self = this,
+                        canPlayUrl = null;
+
+                    this.ye_P_urlArr.forEach(function (url) {
+                        var result = url.match(/\.(\w+)$/);
+
+                        if (result === null) {
+                            YE.error(true, "声音url错误，必须加上类型后缀名");
+                            return $break;
+                        }
+
+                        if (self.ye_canplay(result[1])) {
+                            canPlayUrl = url;
+                            return $break;
+                        }
+                    });
+
+                    if (canPlayUrl === null) {
+                        YE.error(true, "浏览器不支持该声音格式");
+                        return;
+                    }
+
+                    return canPlayUrl;
+                },
+                ye_canplay: function (mimeType) {
+                    var audio = new Audio(),
+                        mimeStr = null;
+
+                    //todo 完善mimeType
+                    switch (mimeType) {
+                        case 'mp3':
+                            mimeStr = "audio/mpeg";
+                            break;
+//                    case 'vorbis':
+//                        mimeStr = "audio/ogg; codecs='vorbis'";
+//                        break;
+//                    case 'opus':
+//                        mimeStr = "audio/ogg; codecs='opus'";
+////                        break;
+//                    case 'webm':
+//                        mimeStr = "audio/webm; codecs='vorbis'";
+//                        break;
+//                    case 'mp4':
+//                        mimeStr = "audio/mp4; codecs='mp4a.40.5'";
+//                        break;
+                        case 'wav':
+                            mimeStr = "audio/wav";
+                            break;
+                        default :
+                            YE.error(true, "声音类型错误");
+                            break;
+                    }
+
+                    if (mimeType == 'mp3' && YE.Tool.judge.browser.isFF()) {
+                        return false;
+                    }
+
+                    return !!audio.canPlayType && audio.canPlayType(mimeStr) !== "";
+                }
+            },
+            Protected: {
+                ye_P_urlArr: null,
+                ye_P_url: null
+            },
+            Public: {
+                initWhenCreate: function () {
+                    this.ye_P_url = this.ye_getCanPlayUrl();
+                }
+            },
+            Abstract: {
+                play: function () {
+                },
+                load: function () {
+                },
+                getPlayState: function () {
+                }
+            }
+        });
+
+        WebAudio = YYC.Class(AudioBase, {
+            Init: function (config) {
+                this.ye__config = config;
+
+                this.ye_P_urlArr = config.urlArr;
+                this.ye__onLoad = config.onLoad;
+                this.ye__onError = config.onError;
+            },
+            Private: {
+                ye__buffer: null,
+                ye__bufferSource: null,
+                ye__onLoad: null,
+                ye__onError: null,
+                ye__config: null,
+                ye__playState: null,
+
+                ye__loadBuffer: function (obj, url) {
+                    var self = this;
+
+                    YE.$.ajax({
+                        type: "get",
+                        url: url,
+                        dataType: "arraybuffer",
+                        success: function (data) {
+                            self.ye__decodeAudioData(data, obj);
+                        },
+                        error: function () {
+                            YE.log("使用Web Audio加载失败！尝试使用Html5 Audio加载");
+                            _audioObj = Html5Audio.create(self.ye__config);
+                            _audioObj.load();
+                        }
+                    });
+                },
+                ye__decodeAudioData: function (arraybuffer, obj) {
+                    var self = this;
+
+                    _ctx.decodeAudioData(
+                        arraybuffer,
+                        function (buffer) {
+                            if (buffer) {
+                                self.ye__buffer = buffer;
+                                self.ye__onLoad(self);
+                            }
+                        },
+                        function (err) {
+                            obj.ye__onError(err.err);
+                        }
+                    );
+                }
+            },
+            Public: {
+                initWhenCreate: function () {
+                    this.base();
+
+                    this.ye__playState = PlayState.NONE;
+                },
+                load: function () {
+                    this.ye__loadBuffer(this, this.ye_P_url);
+                },
+                play: function () {
+                    var source = _ctx.createBufferSource(),
+                        self = this;
+
+                    source.buffer = this.ye__buffer;
+                    source.connect(_ctx.destination);
+                    source.start(0);
+                    this.ye__playState = PlayState.PLAYING;
+
+                    /*!
+                     有问题！线程阻塞时可能会不触发onended！
+                     因此使用timer代替
+                     source.onended = function(){
+                     self.ye__status = 2;
+                     };*/
+
+                    setTimeout(function () {
+                        self.ye__playState = PlayState.END;
+                    }, this.ye__buffer.duration * 1000);
+                },
+                getPlayState: function () {
+                    return this.ye__playState;
+                },
+
+
+                forTest_setAudioContext: function (ctx) {
+                    _ctx = ctx;
+                }
+            },
+            Static: {
+                create: function (config) {
+                    var audio = new this(config);
+
+                    audio.initWhenCreate();
+
+                    return audio;
+                }
+            }
+        });
+
+        Html5Audio = YYC.Class(AudioBase, {
+            Init: function (config) {
+                this.ye_P_urlArr = config.urlArr;
+                this.ye__onLoad = config.onLoad;
+                this.ye__onError = config.onError;
+            },
+            Private: {
+                ye__audio: null,
+                ye__onLoad: null,
+                ye__onError: null,
+
+                ye__load: function () {
+                    //应该在绑定了事件后再设置src
+                    //因为设置src后，即会开始加载声音，所以事件handle越早有效越好。
+                    this.ye__audio.src = this.ye_P_url;
+                }
+            },
+            Public: {
+                load: function () {
+                    var self = this;
+
+                    this.ye__audio = new Audio();
+
+                    this.ye__audio.addEventListener("canplaythrough", function () {
+                        self.ye__onLoad(self);
+                    }, false);
+                    this.ye__audio.addEventListener("error", function () {
+                        self.ye__onError("errorCode " + self.ye__audio.error.code);
+                    }, false);
+//
+//                audio.autoplay = false;
+//                audio.preload = 'auto';
+//                audio.autobuffer = true;
+
+                    /*!
+                     audio在Chrome下必须被reloaded，否则只会播放一次
+                     audio在Firefox下不能被reloaded，否则会延迟
+                     */
+                    this.ye__audio.addEventListener("ended", function () {
+                        if (YE.Tool.judge.browser.isChrome()) {
+                            this.load();
+                        }
+                        else if (YE.Tool.judge.browser.isFF()) {
+                            this.currentTime = 0;
+                        }
+                        else {
+                            YE.error(true, "目前仅支持Chrome、Firefox浏览器");
+                        }
+                    }, false);
+
+                    this.ye__load();
+
+//                setTimeout(function () {
+//                }, 50);
+                },
+                play: function () {
+                    this.ye__audio.play();
+                },
+                getPlayState: function () {
+                    var playState = 0;
+
+                    if (this.ye__audio.ended) {
+                        playState = PlayState.END;
+                    }
+                    else if (this.ye__audio.currentTime > 0) {
+                        playState = PlayState.PLAYING;
+                    }
+                    else {
+                        playState = PlayState.NONE;
+                    }
+
+                    return playState;
+                }
+            },
+            Static: {
+                create: function (config) {
+                    var audio = new this(config);
+
+                    audio.initWhenCreate();
+
+                    return audio;
+                }
+            }
+        });
+    }());
+
+
+    YE.YSound = SoundManager;
+}());
+
+
+(function () {
     var _instance = null;
 
     YE.ImgLoader = YYC.Class(YE.Loader, {
@@ -4071,12 +4486,16 @@
             ye_P_load: function (urlArr, key) {
                 var self = this;
 
-                YE.SoundManager.getInstance().createSound(urlArr, function () {
-                    YE.LoaderManager.getInstance().onResLoaded();
-                    self.ye_P_container.appendChild(key, this);
+                YE.YSound.create({
+                    urlArr: urlArr,
+                    onLoad: function (sound) {
+                        YE.LoaderManager.getInstance().onResLoaded();
+                        self.ye_P_container.appendChild(key, sound);
 
-                }, function (code) {
-                    YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：code" + code);
+                    },
+                    onError: function (msg) {
+                        YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：" + msg);
+                    }
                 });
             }
         },
@@ -4098,16 +4517,15 @@
             this.base();
         },
         Private: {
-            ye_counter: 0
+            ye_counter: 0,
+
+            ye_playOnlyOneSimultaneously: function (audioObject) {
+                if (audioObject.getPlayState() !== 1) {
+                    audioObject.play();
+                }
+            }
         },
         Public: {
-            createSound: function (urlArr, onload, onerror) {
-                YE.YSoundEngine.create({
-                    urlArr: urlArr,
-                    onload: onload,
-                    onerror: onerror
-                });
-            },
             play: function (soundId) {
                 var sound = YE.SoundLoader.getInstance().get(soundId),
                     audioObject = null;
@@ -4122,7 +4540,7 @@
 
                 audioObject = sound[this.ye_counter];
                 this.ye_counter++;
-                audioObject.play();
+                this.ye_playOnlyOneSimultaneously(audioObject);
             }
         },
         Static: {
@@ -5442,142 +5860,6 @@
         Static: {
             create: function (context) {
                 return new this(context);
-            }
-        }
-    });
-}());
-(function () {
-    YE.YSoundEngine = YYC.Class({
-        Init: function (config) {
-            this.ye_urlArr = config.urlArr;
-            this.ye_onload = config.onload;
-            this.ye_onerror = config.onerror;
-        },
-        Private: {
-            ye_audio: null,
-            ye_urlArr: null,
-            ye_onload: null,
-            ye_onerror: null,
-
-            ye_load: function () {
-                //应该在绑定了事件后再设置src
-                //因为设置src后，即会开始加载声音，所以事件handle越早有效越好。
-                this.ye_audio.src = this.ye_getCanPlayUrl();
-            },
-            ye_getCanPlayUrl: function () {
-                var self = this,
-                    canPlayUrl = null;
-
-                this.ye_urlArr.forEach(function (url) {
-                    var result = url.match(/\.(\w+)$/);
-
-                    if (result === null) {
-                        YE.error(true, "声音url错误，必须加上类型后缀名");
-                        return $break;
-                    }
-
-                    if (self.ye_canplay(result[1])) {
-                        canPlayUrl = url;
-                        return $break;
-                    }
-                });
-
-                if (canPlayUrl === null) {
-                    YE.error(true, "浏览器不支持该声音格式");
-                    return;
-                }
-
-                return canPlayUrl;
-            },
-            ye_canplay: function (mimeType) {
-                var audio = new Audio(),
-                    mimeStr = null;
-
-                switch (mimeType) {
-                    case 'mp3':
-                        mimeStr = "audio/mpeg";
-                        break;
-//                    case 'vorbis':
-//                        mimeStr = "audio/ogg; codecs='vorbis'";
-//                        break;
-//                    case 'opus':
-//                        mimeStr = "audio/ogg; codecs='opus'";
-////                        break;
-//                    case 'webm':
-//                        mimeStr = "audio/webm; codecs='vorbis'";
-//                        break;
-//                    case 'mp4':
-//                        mimeStr = "audio/mp4; codecs='mp4a.40.5'";
-//                        break;
-                    case 'wav':
-                        mimeStr = "audio/wav";
-                        break;
-                    default :
-                        YE.error(true, "声音类型错误");
-                        break;
-                }
-
-                if (mimeType == 'mp3' && YE.Tool.judge.browser.isFF()) {
-                    return false;
-                }
-
-                return !!audio.canPlayType && audio.canPlayType(mimeStr) !== "";
-            }
-        },
-        Public: {
-            initWhenCreate: function () {
-                var self = this;
-
-                if (!Audio) {
-                    YE.log("浏览器不支持Audio对象");
-                    return YE.returnForTest;
-                }
-
-                this.ye_audio = new Audio();
-
-                this.ye_audio.addEventListener("canplaythrough", function () {
-                    self.ye_onload();
-                }, false);
-                this.ye_audio.addEventListener("error", function () {
-                    self.ye_onload(self.ye_audio.error.code);
-                }, false);
-//
-//                audio.autoplay = false;
-//                audio.preload = 'auto';
-//                audio.autobuffer = true;
-
-                /*!
-                 audio在Chrome下必须被reloaded，否则只会播放一次
-                 audio在Firefox下不能被reloaded，否则会延迟
-                 */
-                this.ye_audio.addEventListener("ended", function () {
-                    if (YE.Tool.judge.browser.isChrome()) {
-                        this.load();
-                    }
-                    else if (YE.Tool.judge.browser.isFF()) {
-                        this.currentTime = 0;
-                    }
-                    else {
-                        YE.error(true, "目前仅支持Chrome、Firefox浏览器");
-                    }
-                }, false);
-
-                this.ye_load();
-
-                setTimeout(function () {
-                }, 50);
-            },
-            play: function () {
-                this.ye_audio.play();
-            }
-        },
-        Static: {
-            create: function (config) {
-                var engine = new this(config);
-
-                engine.initWhenCreate();
-
-                return engine;
             }
         }
     });

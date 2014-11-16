@@ -236,31 +236,7 @@
                 ye__playState: null,
 
                 ye__loadBuffer: function (obj, url) {
-//                // check if the buffer has already been cached
-//                if (url in cache) {
-//                    // set the duration from the cache
-//                    obj._duration = cache[url].duration;
-//
-//                    // load the sound into this object
-//                    loadSound(obj);
-//                    return;
-//                }
-
-//                if (/^data:[^;]+;base64,/.test(url)) {
-//                    // Decode base64 data-URIs because some browsers cannot load data-URIs with XMLHttpRequest.
-//                    var data = atob(url.split(',')[1]);
-//                    var dataView = new Uint8Array(data.length);
-//                    for (var i=0; i<data.length; ++i) {
-//                        dataView[i] = data.charCodeAt(i);
-//                    }
-//
-//                    ye__decodeAudioData(dataView.buffer, obj, url);
-//                } else {
-
-
                     var self = this;
-
-                    // load the buffer from the URL
 
                     YE.$.ajax({
                         type: "get",
@@ -270,15 +246,6 @@
                             self.ye__decodeAudioData(data, obj);
                         },
                         error: function () {
-                            // if there is an error, switch the sound to HTML Audio
-//                    if (obj._webAudio) {
-//                        obj._buffer = true;
-//                        obj._webAudio = false;
-//                        obj._audioNode = [];
-//                        delete obj._gainNode;
-//                        delete cache[url];
-//                        obj.load();
-//                    }
                             YE.log("使用Web Audio加载失败！尝试使用Html5 Audio加载");
                             _audioObj = Html5Audio.create(self.ye__config);
                             _audioObj.load();
@@ -292,8 +259,6 @@
                         arraybuffer,
                         function (buffer) {
                             if (buffer) {
-//                            cache[url] = buffer;
-//                            loadSound(obj, buffer);
                                 self.ye__buffer = buffer;
                                 self.ye__onLoad(self);
                             }
@@ -322,11 +287,12 @@
                     source.start(0);
                     this.ye__playState = PlayState.PLAYING;
 
-//                //有问题！线程阻塞时可能会不触发onended！
-//                //因此使用timer代替
-//                source.onended = function(){
-//                    self.ye__status = 2;
-//                };
+                    /*!
+                     有问题！线程阻塞时可能会不触发onended！
+                     因此使用timer代替
+                     source.onended = function(){
+                     self.ye__status = 2;
+                     };*/
 
                     setTimeout(function () {
                         self.ye__playState = PlayState.END;
