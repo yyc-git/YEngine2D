@@ -5,7 +5,7 @@
         "dist/yEngine2D.js",
         "dist/yEngine2D.min.js"
     ],
-    "description": "2D web game engine",
+    "description": "2D HTML5 Game Engine",
     "ignore": [
         "bower_components",
         "src",

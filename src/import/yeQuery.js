@@ -1,4 +1,4 @@
-/**YEngine2D
+/**YEQuery dom操作和ajax封装库
  * author：YYC
  * date：2014-10-26
  * email：395976266@qq.com
@@ -68,9 +68,15 @@
 
                 try {
                     xhr.open(type, url, true);
+
+                    if (_isSoundFile(dataType)) {
+                        xhr.responseType = "arraybuffer";
+                    }
+
                     if (type === "GET" || type === "get") {
                         xhr.send(null);
-                    } else if (type === "POST" || type === "post") {
+                    }
+                    else if (type === "POST" || type === "post") {
                         xhr.setRequestHeader("content-type", "application/x-www-form-urlencoded");
                         xhr.send(data);
                     }
@@ -83,13 +89,20 @@
                                 if (success !== null) {//普通文本
                                     success(xhr.responseText);
                                 }
-                            } else if (dataType === "xml" || dataType === "XML") {
+                            }
+                            else if (dataType === "xml" || dataType === "XML") {
                                 if (success !== null) {//接收xml文档
                                     success(xhr.responseXML);
                                 }
-                            } else if (dataType === "json" || dataType === "JSON") {
+                            }
+                            else if (dataType === "json" || dataType === "JSON") {
                                 if (success !== null) {//将json字符串转换为js对象
                                     success(eval("(" + xhr.responseText + ")"));
+                                }
+                            }
+                            else if(_isSoundFile(dataType)){
+                                if (success !== null) {//将json字符串转换为js对象
+                                    success(xhr.response);
                                 }
                             }
                         }
@@ -100,7 +113,7 @@
                 }
             }
 
-            function _createAjax() {
+            function _createAjax(error) {
                 var xhr = null;
                 try {//IE系列浏览器
                     xhr = new ActiveXObject("microsoft.xmlhttp");
@@ -117,6 +130,10 @@
 
             function _isLocalFile(status) {
                 return document.URL.contain("file://") && status === 0;
+            }
+
+            function _isSoundFile(dataType) {
+                return dataType === "arraybuffer";
             }
 
             return ajax;

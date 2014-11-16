@@ -634,8 +634,8 @@ beforeEach(function () {
 
                         return {
                             pass: actual.calledWith.apply(actual, expectedArg),
-                            message: "Expected to called with " + Tool.convert.toString(expectedArg)
-                                + ", actual is " + Tool.convert.toString(actualArg)
+                            message: "Expected to called with " + Tool.convert.toString(expectedArg).slice(1,-1)
+                                + ", actual is " + Tool.convert.toString(actualArg).slice(1,-1)
                         }
                     }
                 };

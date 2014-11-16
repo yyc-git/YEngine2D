@@ -10,7 +10,7 @@
 (function () {
     var _instance = null;
 
-    var GameStatus = {
+    var GameState = {
         NORMAL: 0,
         PAUSE: 1,
         END: 2
@@ -45,7 +45,7 @@
             ye_isRequestAnimFrameLoopAdded: false,
 
             //内部游戏状态
-            ye_gameStatus: null,
+            ye_gameState: null,
             //计时器序号
             ye_timerIndex: 0,
 
@@ -138,7 +138,7 @@
                 this.setCurrentScene(scene);
 
                 this.ye_startTime = this.ye_getTimeNow();
-                this.ye_gameStatus = GameStatus.NORMAL;
+                this.ye_gameState = GameState.NORMAL;
 
                 this.ye_startLoop();
             },
@@ -165,11 +165,11 @@
             },
             end: function () {
                 this.ye_endNextLoop();
-                this.ye_gameStatus = GameStatus.END;
+                this.ye_gameState = GameState.END;
                 YE.Tool.asyn.clearAllTimer(this.ye_timerIndex);
             },
             pause: function () {
-                if (this.ye_gameStatus === GameStatus.PAUSE) {
+                if (this.ye_gameState === GameState.PAUSE) {
                     return YE.returnForTest;
                 }
 
@@ -178,16 +178,16 @@
 
                 this.ye_lastLoopInterval = this.ye_loopInterval;
                 this.ye_endNextLoop();
-                this.ye_gameStatus = GameStatus.PAUSE;
+                this.ye_gameState = GameState.PAUSE;
             },
             resume: function () {
-                if (this.ye_gameStatus !== GameStatus.PAUSE) {
+                if (this.ye_gameState !== GameState.PAUSE) {
                     return YE.returnForTest;
                 }
 
                 this.ye_loopInterval = this.ye_lastLoopInterval;
                 this.ye_restart();
-                this.ye_gameStatus = GameStatus.NORMAL;
+                this.ye_gameState = GameState.NORMAL;
             },
             /**
              * 设置主循环间隔时间
@@ -210,8 +210,8 @@
             },
 
             //*供测试使用
-            forTest_getGameStatus: function () {
-                return GameStatus;
+            forTest_getGameState: function () {
+                return GameState;
             },
             forTest_getLoopType: function () {
                 return LoopType;

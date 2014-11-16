@@ -21,41 +21,22 @@ describe("SoundManager", function () {
         testTool.judgeSingleInstance(YE.SoundManager);
     });
 
-    describe("createSound", function () {
-        var fakeSound = null;
-
-        beforeEach(function () {
-            fakeSound = {};
-            sandbox.stub(YE.YSoundEngine, "create");
-        });
-        afterEach(function () {
-        });
-
-        it("委托声音引擎加载声音", function () {
-            var urlArr = ["a.mp3"],
-                onload = function () {
-                },
-                onerror = function () {
-                };
-
-            manager.createSound(urlArr, onload, onerror);
-
-            expect(YE.YSoundEngine.create.args[0][0]).toEqual({
-                urlArr: urlArr,
-                onload: onload,
-                onerror: onerror
-            });
-        });
-    });
-
     describe("play", function () {
+        var fakeSound1 = null,
+            fakeSound2 = null;
+
         beforeEach(function () {
+            fakeSound1 = sandbox.createSpyObj("play");
+            fakeSound2 = sandbox.createSpyObj("play");
+            sandbox.stub(YE.SoundLoader, "getInstance").returns({
+                get: sandbox.stub().returns([fakeSound1, fakeSound2])
+            });
         });
         afterEach(function () {
         });
 
         it("如果声音没有被加载，则返回", function () {
-            sandbox.stub(YE.SoundLoader, "getInstance").returns({
+            YE.SoundLoader.getInstance.returns({
                 get: sandbox.stub().returns(undefined)
             });
 
@@ -64,11 +45,8 @@ describe("SoundManager", function () {
             expect(result).toEqual(YE.returnForTest);
         });
         it("依次播放声音数组", function () {
-            var fakeSound1 = sandbox.createSpyObj("play"),
-                fakeSound2 = sandbox.createSpyObj("play");
-            sandbox.stub(YE.SoundLoader, "getInstance").returns({
-                get: sandbox.stub().returns([fakeSound1, fakeSound2])
-            });
+            fakeSound1.getPlayState = sandbox.stub().returns(0);
+            fakeSound2.getPlayState = sandbox.stub().returns(0);
 
             manager.play();
             manager.play();
@@ -77,6 +55,16 @@ describe("SoundManager", function () {
             expect(fakeSound1.play.firstCall).toCalledBefore(fakeSound2.play.firstCall);
             expect(fakeSound1.play.callCount).toEqual(2);
             expect(fakeSound2.play.callCount).toEqual(1);
+        });
+        it("如果声音正在播放，则不调用play方法播放声音", function () {
+            fakeSound1.getPlayState = sandbox.stub().returns(0);
+            fakeSound2.getPlayState = sandbox.stub().returns(1);
+
+            manager.play();
+            manager.play();
+
+            expect(fakeSound1.play.callCount).toEqual(1);
+            expect(fakeSound2.play.callCount).toEqual(0);
         });
     });
 });

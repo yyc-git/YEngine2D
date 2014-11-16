@@ -23,12 +23,16 @@
             ye_P_load: function (url, key) {
                 var self = this;
 
-                YE.SoundManager.getInstance().createSound(url, function () {
+                YE.YSound.create({
+                    urlArr: urlArr,
+                    onLoad: function (sound) {
                     YE.LoaderManager.getInstance().onResLoaded();
-                    self.ye_P_container.appendChild(key, this);
+                        self.ye_P_container.appendChild(key, sound);
 
-                }, function (code) {
-                    YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：code" + code);
+                    },
+                    onError: function (msg) {
+                        YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：" + msg);
+                    }
                 });
             }
         },

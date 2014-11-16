@@ -15,18 +15,15 @@
             this.base();
         },
         Private: {
-            ye_counter: 0
+            ye_counter: 0,
+
+            ye_playOnlyOneSimultaneously: function (audioObject) {
+                if (audioObject.getPlayState() !== 1) {
+                    audioObject.play();
+                }
+            }
         },
         Public: {
-            createSound: function (url, onload, onerror) {
-                var urlArr = YE.Tool.judge.isArray(url) ? url : [url];
-
-                YE.YSoundEngine.create({
-                    urlArr: urlArr,
-                    onload: onload,
-                    onerror: onerror
-                });
-            },
             play: function (soundId) {
                 var sound = YE.SoundLoader.getInstance().get(soundId),
                     audioObject = null;
@@ -41,7 +38,7 @@
 
                 audioObject = sound[this.ye_counter];
                 this.ye_counter++;
-                audioObject.play();
+                this.ye_playOnlyOneSimultaneously(audioObject);
             }
         },
         Static: {
