@@ -14,57 +14,48 @@
         HTML5AUDIO: 2
     };
     var _audioType = null,
-        _ctx = null;
-    var _audioInstance = null;
+        _ctx = null,
+        _audioInstance = null;
 
     _audioTest();
 
     function _audioTest() {
         try {
-            var contextClass = (window.AudioContext ||
+            var contextClass = window.AudioContext ||
                 window.webkitAudioContext ||
                 window.mozAudioContext ||
                 window.oAudioContext ||
-                window.msAudioContext);
+                window.msAudioContext;
             if (contextClass) {
                 _ctx = new contextClass();
                 _audioType = AudioType.WEBAUDIO;
-            } else {
+            }
+            else {
                 _html5AudioTest();
             }
-        } catch (e) {
+        }
+        catch (e) {
             _html5AudioTest();
         }
     }
 
     function _html5AudioTest() {
-        if (typeof Audio !== 'undefined') {
+        if (typeof Audio !== "undefined") {
             try {
                 new Audio();
                 _audioType = AudioType.HTML5AUDIO;
-            } catch (e) {
+            }
+            catch (e) {
                 _audioType = AudioType.NONE;
             }
-        } else {
+        }
+        else {
             _audioType = AudioType.HTML5AUDIO;
         }
     }
 
-//
-//    if (!usingWebAudio) {
-//        if (typeof Audio !== 'undefined') {
-//            try {
-//                new Audio();
-//            } catch (e) {
-//                noAudio = true;
-//            }
-//        } else {
-//            noAudio = true;
-//        }
-//    }
 
-
-    var SoundAPI = YYC.Class({
+    var SoundManager = YYC.Class({
         Init: function (config) {
             this.ye_config = config;
         },
@@ -84,8 +75,12 @@
                         YE.log("浏览器不支持Web Audio和Html5 Audio");
                         return YE.returnForTest;
                         break;
-
+                    default:
+                        return YE.returnForTest;
+                        break;
                 }
+
+                _audioInstance.load();
             },
             play: function () {
                 _audioInstance.play();
@@ -178,6 +173,8 @@
         },
         Abstract: {
             play: function () {
+            },
+            load: function () {
             }
         }
     });
@@ -192,7 +189,6 @@
         },
         Private: {
             ye_buffer: null,
-            ye_P_urlArr: null,
             ye_onload: null,
             ye_onerror: null,
             ye_config: null,
@@ -216,7 +212,7 @@
 //                        dataView[i] = data.charCodeAt(i);
 //                    }
 //
-//                    decodeAudioData(dataView.buffer, obj, url);
+//                    ye_decodeAudioData(dataView.buffer, obj, url);
 //                } else {
 
 
@@ -224,16 +220,15 @@
 
                 // load the buffer from the URL
 
-                //todo 重构，使用yeQuery的ajax方法
-
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
-                xhr.responseType = 'arraybuffer';
-                xhr.onload = function () {
-                    self.decodeAudioData(xhr.response, obj, url);
-                };
-                xhr.onerror = function () {
-                    // if there is an error, switch the sound to HTML Audio
+               YE.$.ajax({
+                   type:"get",
+                   url:url,
+                   dataType:"arraybuffer",
+                   success:function(data){
+                       self.ye_decodeAudioData(data, obj, url);
+                   },
+                   error:function(){
+                       // if there is an error, switch the sound to HTML Audio
 //                    if (obj._webAudio) {
 //                        obj._buffer = true;
 //                        obj._webAudio = false;
@@ -242,16 +237,38 @@
 //                        delete cache[url];
 //                        obj.load();
 //                    }
-                    _audioInstance = Html5Audio.create(self.ye_config);
-                };
-                try {
-                    xhr.send();
-                } catch (e) {
-                    xhr.onerror();
-                }
+                       YE.log("使用Web Audio加载失败！尝试使用Html5 Audio加载");
+                       _audioInstance = Html5Audio.create(self.ye_config);
+                       _audioInstance.load();
+                   }
+               });
+//                
+//                var xhr = new XMLHttpRequest();
+//                xhr.open('GET', url, true);
+//                xhr.responseType = 'arraybuffer';
+//                xhr.onload = function () {
+//                    self.ye_decodeAudioData(xhr.response, obj, url);
+//                };
+//                xhr.onerror = function () {
+//                    // if there is an error, switch the sound to HTML Audio
+////                    if (obj._webAudio) {
+////                        obj._buffer = true;
+////                        obj._webAudio = false;
+////                        obj._audioNode = [];
+////                        delete obj._gainNode;
+////                        delete cache[url];
+////                        obj.load();
+////                    }
+//                    _audioInstance = Html5Audio.create(self.ye_config);
+//                };
+//                try {
+//                    xhr.send();
+//                } catch (e) {
+//                    xhr.onerror();
 //                }
+////                }
             },
-            decodeAudioData: function (arraybuffer, obj, url) {
+            ye_decodeAudioData: function (arraybuffer, obj, url) {
                 var self = this;
 
                 // decode the buffer into an audio source
@@ -266,9 +283,7 @@
                         }
                     },
                     function (err) {
-                        //todo err对象结构？
-                        console.log(err);
-                        obj.ye_onerror("");
+                        obj.ye_onerror(err.err);
                     }
                 );
             }
@@ -276,7 +291,8 @@
         Public: {
             initWhenCreate: function () {
                 this.base();
-
+            },
+            load: function () {
                 this.ye_loadBuffer(this, this.ye_P_url);
             },
             play: function () {
@@ -316,9 +332,10 @@
         },
         Public: {
             initWhenCreate: function () {
-                var self = this;
-
                 this.base();
+            },
+            load: function () {
+                var self = this;
 
                 this.ye_audio = new Audio();
 
@@ -326,7 +343,7 @@
                     self.ye_onload(self);
                 }, false);
                 this.ye_audio.addEventListener("error", function () {
-                    self.ye_onerror(self.ye_audio.error.code);
+                    self.ye_onerror("errorCode " + self.ye_audio.error.code);
                 }, false);
 //
 //                audio.autoplay = false;
@@ -351,8 +368,8 @@
 
                 this.ye_load();
 
-                setTimeout(function () {
-                }, 50);
+//                setTimeout(function () {
+//                }, 50);
             },
             play: function () {
                 this.ye_audio.play();
@@ -369,7 +386,6 @@
         }
     });
 
-//    var SoundManager = YYC.Class();
-    YE.YSoundEngine = SoundAPI;
+    YE.YSoundEngine = SoundManager;
 }());
 

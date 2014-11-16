@@ -24,8 +24,8 @@
                     YE.LoaderManager.getInstance().onResLoaded();
                     self.ye_P_container.appendChild(key, sound);
 
-                }, function (code) {
-                    YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：code" + code);
+                }, function (msg) {
+                    YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：" + msg);
 //                    YE.LoaderManager.getInstance().onResError(urlArr, "错误error");
                 });
             }
