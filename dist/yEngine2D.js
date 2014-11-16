@@ -2,7 +2,7 @@
  yEngine2D
  2D HTML5 Game Engine
 
- version: 0.1.0
+ version: 0.1.1
  author: YYC
  email: 395976266@qq.com
  qq: 395976266
@@ -1147,7 +1147,7 @@
             ye_loadedUrl: null
         },
         Protected: {
-            ye_P_container: null   ,
+            ye_P_container: null,
 
             Abstract: {
                 ye_P_load: function () {
@@ -1838,7 +1838,7 @@
         }
     });
 }());
-(function(){
+(function () {
     YE.Sequence = YYC.Class(YE.Control, {
         Init: function () {
             this.base();
@@ -4011,11 +4011,11 @@
         },
         Static: {
             create: function (config) {
-                var api = new this(config);
+                var manager = new this(config);
 
-                api.initWhenCreate();
+                manager.initWhenCreate();
 
-                return api;
+                return manager;
             }
         }
     });

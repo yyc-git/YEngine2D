@@ -1,6 +1,6 @@
 {
     "name": "yEngine2D",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "main": [
         "dist/yEngine2D.js",
         "dist/yEngine2D.min.js"

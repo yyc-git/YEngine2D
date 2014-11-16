@@ -48,38 +48,30 @@
             getCurrentLoadedCount: function () {
                 return this.ye_currentLoadedCount;
             },
-            preload: function (resources, isSerialLoad) {
+            preload: function (resources) {
                 var self = this;
 
-                if(isSerialLoad){
-                    YE.SoundLoader.getInstance().add(resources);
-                    self.ye_resCount += resources.length;
-                }
-                else{
-                    resources.forEach(function (res) {
-                        switch (res.type) {
-                            case "image":
-                                YE.ImgLoader.getInstance().load(res.url, res.id);
-                                self.ye_resCount += 1;
-                                break;
-                            case "json":
-                                YE.JsonLoader.getInstance().load(res.url, res.id);
-                                self.ye_resCount += 1;
-                                break;
-                            case "sound":
-                                YE.SoundLoader.getInstance().load(res.url, res.id);
-                                self.ye_resCount += 1;
-                                break;
-                            default:
-                                YE.error(true, "type错误");
-                                break;
-                        }
-                    });
-                }
+                resources.forEach(function (res) {
+                    switch (res.type) {
+                        case "image":
+                            YE.ImgLoader.getInstance().load(res.url, res.id);
+                            self.ye_resCount += 1;
+                            break;
+                        case "json":
+                            YE.JsonLoader.getInstance().load(res.url, res.id);
+                            self.ye_resCount += 1;
+                            break;
+                        case "sound":
+                            YE.SoundLoader.getInstance().load(res.url, res.id);
+                            self.ye_resCount += 1;
+                            break;
+                        default:
+                            YE.error(true, "type错误");
+                            break;
+                    }
+                });
 
                 this.ye_isFinishLoad();
-
-                YE.SoundLoader.getInstance().load();
             },
             reset: function () {
                 this.ye_resCount = 0;

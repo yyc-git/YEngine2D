@@ -127,11 +127,11 @@
         },
         Static: {
             create: function (config) {
-                var api = new this(config);
+                var manager = new this(config);
 
-                api.initWhenCreate();
+                manager.initWhenCreate();
 
-                return api;
+                return manager;
             }
         }
     });
