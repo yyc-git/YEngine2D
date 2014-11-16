@@ -32,8 +32,7 @@
     "homepage": "",
     "repository": "https://github.com/yyc-git/YEngine2D",
     "dependencies": {
-        "yoop": "~1.1.0",
-        "howler": "*"
+        "yoop": "~1.1.0"
     },
     "devDependencies": {
         "jquery": "1.7.1"

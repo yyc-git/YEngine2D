@@ -20,25 +20,15 @@
 
                 YE.YSound.create({
                     urlArr: urlArr,
-                    onload: function (sound) {
+                    onLoad: function (sound) {
                         YE.LoaderManager.getInstance().onResLoaded();
                         self.ye_P_container.appendChild(key, sound);
 
                     },
-                    onerror: function (msg) {
+                    onError: function (msg) {
                         YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：" + msg);
                     }
                 });
-//                audio = new Howl({
-//                    urls: urlArr,
-//                    onload: function () {
-//                        YE.LoaderManager.getInstance().onResLoaded();
-//                        self.ye_P_container.appendChild(key, this);
-//                    },
-//                    onloaderror: function () {
-//                        YE.LoaderManager.getInstance().onResError(urlArr, "错误原因：" + msg);
-//                    }
-//                });
             }
         },
         Static: {

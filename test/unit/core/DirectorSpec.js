@@ -105,11 +105,11 @@ describe("Director", function () {
         it("获得开始时间（毫秒）", function () {
         });
         it("初始化游戏状态", function () {
-            director.ye_gameStatus = director.forTest_getGameStatus().END;
+            director.ye_gameState = director.forTest_getGameState().END;
 
             director.runWithScene(fakeScene);
 
-            expect(director.ye_gameStatus).toEqual(director.forTest_getGameStatus().NORMAL);
+            expect(director.ye_gameState).toEqual(director.forTest_getGameState().NORMAL);
         });
         it("启动主循环", function () {
             director.runWithScene(fakeScene);
@@ -159,7 +159,7 @@ describe("Director", function () {
 //        it("设置游戏状态为NORMAL", function () {
 //            director.ye_startLoop();
 //
-//            expect(director.ye_gameStatus).toEqual(director.forTest_getGameStatus().NORMAL);
+//            expect(director.ye_gameState).toEqual(director.forTest_getGameState().NORMAL);
 //        });
 
         describe("如果使用setInterval实现主循环", function () {
@@ -377,7 +377,7 @@ describe("Director", function () {
         it("游戏状态设为END", function () {
             director.end();
 
-            expect(director.ye_gameStatus).toEqual(director.forTest_getGameStatus().END);
+            expect(director.ye_gameState).toEqual(director.forTest_getGameState().END);
         });
         it("停止所有计时器", function () {
             var index = 10;
@@ -391,7 +391,7 @@ describe("Director", function () {
 //
     describe("pause", function () {
         it("如果已经暂停了，则返回", function () {
-            director.ye_gameStatus = director.forTest_getGameStatus().PAUSE;
+            director.ye_gameState = director.forTest_getGameState().PAUSE;
 
             var result = director.pause();
 
@@ -400,7 +400,7 @@ describe("Director", function () {
 
         describe("否则", function () {
             beforeEach(function () {
-                director.ye_gameStatus = director.forTest_getGameStatus().NORMAL;
+                director.ye_gameState = director.forTest_getGameState().NORMAL;
             });
             afterEach(function () {
             });
@@ -422,7 +422,7 @@ describe("Director", function () {
             it("设置游戏状态为PAUSE", function () {
                 director.pause();
 
-                expect(director.ye_gameStatus).toEqual(director.forTest_getGameStatus().PAUSE);
+                expect(director.ye_gameState).toEqual(director.forTest_getGameState().PAUSE);
             });
         });
     });
@@ -434,7 +434,7 @@ describe("Director", function () {
         });
 
         it("如果没有暂停，则返回", function () {
-            director.ye_gameStatus = director.forTest_getGameStatus().NORMAL;
+            director.ye_gameState = director.forTest_getGameState().NORMAL;
 
             var result = director.resume();
 
@@ -443,7 +443,7 @@ describe("Director", function () {
 
         describe("否则", function () {
             beforeEach(function () {
-                director.ye_gameStatus = director.forTest_getGameStatus().PAUSE;
+                director.ye_gameState = director.forTest_getGameState().PAUSE;
             });
 
             it("恢复间隔时间", function () {
@@ -462,7 +462,7 @@ describe("Director", function () {
             it("设置游戏状态为NORMAL", function () {
                 director.resume();
 
-                expect(director.ye_gameStatus).toEqual(director.forTest_getGameStatus().NORMAL);
+                expect(director.ye_gameState).toEqual(director.forTest_getGameState().NORMAL);
             });
         });
     });
