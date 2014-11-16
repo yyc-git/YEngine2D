@@ -18,22 +18,6 @@
             ye_counter: 0
         },
         Public: {
-            createSound: function (urlArr, onload, onerror) {
-//                new Howl({
-//                    urls: urlArr,
-//                    onload: onload,
-//                    onloaderror: onerror
-//                });
-
-                //todo 增加cache
-                //ye_load_url不是cache机制？反思
-
-                YE.YSoundEngine.create({
-                    urlArr: urlArr,
-                    onload: onload,
-                    onerror: onerror
-                });
-            },
             play: function (soundId) {
                 var sound = YE.SoundLoader.getInstance().get(soundId),
                     audioObject = null;
