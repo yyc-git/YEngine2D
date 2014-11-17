@@ -157,11 +157,11 @@
                 return this.ye_fps;
             },
             getPixPerFrame: function (speed) {
-                if (YE.main.getConfig().isDebug) {
-                    return speed / this.ye_STARTING_FPS;
-                }
-
-                return speed / this.ye_fps;
+//                if (YE.main.getConfig().isDebug) {
+                return speed / this.ye_STARTING_FPS;
+//                }
+//
+//                return speed / this.ye_fps;
             },
             end: function () {
                 this.ye_endNextLoop();

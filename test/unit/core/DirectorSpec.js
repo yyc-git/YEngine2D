@@ -21,35 +21,6 @@ describe("Director", function () {
         testTool.judgeSingleInstance(YE.Director);
     });
 
-    /*
-     该测试需要调用Director-》forTest_clearInstance方法：
-     forTest_clearInstance: function () {
-     _instance = null;
-     }
-
-     但是我想删除该方法，因为应该在产品代码中尽可能地减少测试方法。
-     因此删除后，该测试就不能进行了！
-
-
-
-
-
-     it("第一次创建实例时，进行初始化", function () {
-     var stub = sandbox.stub(),
-     fakeDirector = function () {
-     this.initWhenCreate = stub;
-     };
-     fakeDirector.getInstance = YE.Director.getInstance;
-     sandbox.stub(YE, "Director", fakeDirector);
-
-     YE.Director.forTest_clearInstance();
-     YE.Director.getInstance();
-
-     expect(stub).toCalledOnce();
-     });
-     */
-
-
     describe("setCurrentScene", function () {
         it("如果当前场景存在，则调用当前场景的onexit", function () {
             var fakeScene1 = sandbox.createSpyObj("onExit");
@@ -336,9 +307,9 @@ describe("Director", function () {
 
     describe("getFps", function () {
     });
-//
+
     describe("getPixPerFrame", function () {
-        it("如果处于调试状态，则fps为固定的ye_STARTING_FPS", function () {
+        it("计算精灵每帧移动的距离（单位为像素pix），fps为固定的ye_STARTING_FPS", function () {
             var fps = 60;
             var sandbox = sinon.sandbox.create();
             sandbox.stub(YE.main, "getConfig").returns({
@@ -350,17 +321,17 @@ describe("Director", function () {
 
             sandbox.restore();
         });
-        it("否则，计算精灵每帧移动的距离（单位为像素pix）。距离=精灵每秒移动像素值（即速度）*每一帧持续的秒数（即1/fps）", function () {
-            var sandbox = sinon.sandbox.create();
-            sandbox.stub(YE.main, "getConfig").returns({
-                isDebug: false
-            });
-            director.ye_fps = 10;
-
-            expect(director.getPixPerFrame(2)).toEqual(0.2);
-
-            sandbox.restore();
-        });
+//        it("否则，计算精灵每帧移动的距离（单位为像素pix）。距离=精灵每秒移动像素值（即速度）*每一帧持续的秒数（即1/fps）", function () {
+//            var sandbox = sinon.sandbox.create();
+//            sandbox.stub(YE.main, "getConfig").returns({
+//                isDebug: false
+//            });
+//            director.ye_fps = 10;
+//
+//            expect(director.getPixPerFrame(2)).toEqual(0.2);
+//
+//            sandbox.restore();
+//        });
     });
 
     describe("end", function () {
