@@ -17,8 +17,8 @@ describe("YSound", function () {
     beforeEach(function () {
         sandbox = sinon.sandbox.create();
         sound = new YE.YSound({});
-        AudioType = sound.forTest_getAudioTypeEnum();
-        PlayState = sound.forTest_getPlayStateEnum();
+        AudioType = YE.YSound.AudioType;
+        PlayState = YE.YSound.PlayState;
         AudioBase = sound.forTest_getAudioBase();
         WebAudio = sound.forTest_getWebAudio();
         Html5Audio = sound.forTest_getHtml5Audio();
@@ -28,16 +28,11 @@ describe("YSound", function () {
     });
 
     describe("initWhenCreate", function () {
-        beforeEach(function () {
-        });
-        afterEach(function () {
-        });
-
         describe("判断audioType，创建对应的audio实例并加载声音", function () {
             var audioObj = null;
 
             function judge(type, Class) {
-                sound.forTest_setAudioType(type);
+                sandbox.stub(YE.YSound, "_audioType", type);
                 sandbox.stub(Class, "create").returns(audioObj);
                 sound.ye_config = {};
 
@@ -58,7 +53,7 @@ describe("YSound", function () {
                 judge(AudioType.HTML5AUDIO, Html5Audio);
             });
             it("如果audioType为none，则给出日志提示并返回", function () {
-                sound.forTest_setAudioType(AudioType.NONE);
+                sandbox.stub(YE.YSound, "_audioType", AudioType.NONE);
                 sandbox.stub(YE, "log");
 
                 var result = sound.initWhenCreate();
@@ -67,7 +62,7 @@ describe("YSound", function () {
                 expect(result).toEqual(YE.returnForTest);
             });
             it("否则，返回", function () {
-                sound.forTest_setAudioType(null);
+                sandbox.stub(YE.YSound, "_audioType", null);
 
                 var result = sound.initWhenCreate();
 
@@ -79,7 +74,7 @@ describe("YSound", function () {
     describe("play", function () {
         it("播放声音", function () {
             var obj = sandbox.createStubObj("play");
-            sound.forTest_setAudioObj(obj);
+            YE.YSound._audioObj = obj;
 
             sound.play();
 
@@ -90,7 +85,7 @@ describe("YSound", function () {
     describe("getPlayState", function () {
         it("获得播放状态", function () {
             var obj = sandbox.createStubObj("play");
-            sound.forTest_setAudioObj(obj);
+            YE.YSound._audioObj = obj;
 
             sound.play();
 
@@ -361,7 +356,7 @@ describe("YSound", function () {
 
                 beforeEach(function () {
                     ctx = sandbox.createStubObj("decodeAudioData");
-                    audio.forTest_setAudioContext(ctx);
+                    sandbox.stub(YE.YSound, "_ctx", ctx);
                 });
 
                 it("解码数据", function () {
@@ -431,9 +426,8 @@ describe("YSound", function () {
                 ctx = {
                     createBufferSource: sandbox.stub().returns(source)
                 };
-                audio.forTest_setAudioContext(ctx);
+                sandbox.stub(YE.YSound, "_ctx", ctx);
             });
-
 
             it("播放声音", function () {
                 audio.ye__buffer = {};

@@ -71,14 +71,14 @@ describe("Layer.js", function () {
 
                 layer.Init();
 
-                expect(layer.ye___state).toEqual(layer.forTest_getState().CHANGE);
+                expect(layer.ye___state).toEqual(YE.Layer.State.CHANGE);
             });
             it("如果isChange返回false，则state设为normal", function () {
                 sandbox.stub(layer, "isChange").returns(false);
 
                 layer.Init();
 
-                expect(layer.ye___state).toEqual(layer.forTest_getState().NORMAL);
+                expect(layer.ye___state).toEqual(YE.Layer.State.NORMAL);
             });
         });
     });

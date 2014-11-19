@@ -8,10 +8,10 @@
  * license: MIT
  */
 (function () {
-    var _keyListeners = {};
-
     YE.EventManager = {
-        _getEventType: function (event) {
+        ye_keyListeners:{},
+
+        ye_getEventType: function (event) {
             var eventType = "",
                 e = YE.Event;
 
@@ -56,7 +56,7 @@
             var eventType = "",
                 _handler = null;
 
-            eventType = this._getEventType(event);
+            eventType = this.ye_getEventType(event);
 
             if (handlerContext) {
                 _handler = YE.Tool.event.bindEvent(handlerContext, handler);
@@ -69,36 +69,36 @@
             this._registerEvent(eventType, _handler, eventContext || window);
         },
         _registerEvent: function (eventType, handler, eventContext) {
-            if (_keyListeners[eventType] === undefined) {
-                _keyListeners[eventType] = [
+            if (this.ye_keyListeners[eventType] === undefined) {
+                this.ye_keyListeners[eventType] = [
                     [handler, eventContext]
                 ];
             }
             else {
-                _keyListeners[eventType].push([handler, eventContext]);
+                this.ye_keyListeners[eventType].push([handler, eventContext]);
             }
         },
         removeListener: function (event) {
             var eventType = "";
 
-            eventType = this._getEventType(event);
+            eventType = this.ye_getEventType(event);
 
-            if (_keyListeners[eventType]) {
-                _keyListeners[eventType].forEach(function (e, i) {
+            if (this.ye_keyListeners[eventType]) {
+                this.ye_keyListeners[eventType].forEach(function (e, i) {
                     YE.Tool.event.removeEvent(e[1], eventType, e[0]);
                 });
-                _keyListeners[eventType] = undefined;
+                this.ye_keyListeners[eventType] = undefined;
             }
         },
         removeAllListener: function () {
             var eventType = null;
 
-            for (eventType in _keyListeners) {
-                _keyListeners[eventType].forEach(function (e, i) {
+            for (eventType in this.ye_keyListeners) {
+                this.ye_keyListeners[eventType].forEach(function (e, i) {
                     YE.Tool.event.removeEvent(e[1], eventType, e[0]);
                 });
             }
-            _keyListeners = {};
+            this.ye_keyListeners = {};
         }
     };
 }());

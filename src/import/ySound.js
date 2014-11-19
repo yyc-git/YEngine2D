@@ -1,6 +1,4 @@
-/**YSound
- * web audio库
- *
+/**YSound 声音库
  * author：YYC
  * date：2014-05-26
  * email：395976266@qq.com
@@ -13,60 +11,10 @@
     //todo 增加cache机制
     //todo 增强浏览器兼容性
 
-    var AudioType = {
-            NONE: 0,
-            WEBAUDIO: 1,
-            HTML5AUDIO: 2
-        },
-        PlayState = {
-            NONE: 0,
-            PLAYING: 1,
-            END: 2
-        };
-    var _audioType = null,
-        _ctx = null,
-        _audioObj = null;
-    var AudioBase = null,
-        WebAudio = null,
-        Html5Audio = null;
-
-    _audioDetect();
-
-    function _audioDetect() {
-        try {
-            var contextClass = window.AudioContext ||
-                window.webkitAudioContext ||
-                window.mozAudioContext ||
-                window.oAudioContext ||
-                window.msAudioContext;
-            if (contextClass) {
-                _ctx = new contextClass();
-                _audioType = AudioType.WEBAUDIO;
-            }
-            else {
-                _html5AudioDetect();
-            }
-        }
-        catch (e) {
-            _html5AudioDetect();
-        }
-    }
-
-    function _html5AudioDetect() {
-        if (typeof Audio !== "undefined") {
-            try {
-                new Audio();
-                _audioType = AudioType.HTML5AUDIO;
-            }
-            catch (e) {
-                _audioType = AudioType.NONE;
-            }
-        }
-        else {
-            _audioType = AudioType.HTML5AUDIO;
-        }
-    }
-
+    //内部类变量不作为SoundManager的静态成员，因为内部类变量不是设计为全局共享的
+    var _AudioBase = null,
+        _WebAudio = null,
+        _Html5Audio = null;
 
     var SoundManager = YYC.Class({
         Init: function (config) {
@@ -77,14 +25,14 @@
         },
         Public: {
             initWhenCreate: function () {
-                switch (_audioType) {
-                    case AudioType.WEBAUDIO:
-                        _audioObj = WebAudio.create(this.ye_config);
+                switch (SoundManager._audioType) {
+                    case SoundManager.AudioType.WEBAUDIO:
+                        SoundManager._audioObj = _WebAudio.create(this.ye_config);
                         break;
-                    case AudioType.HTML5AUDIO:
-                        _audioObj = Html5Audio.create(this.ye_config);
+                    case SoundManager.AudioType.HTML5AUDIO:
+                        SoundManager._audioObj = _Html5Audio.create(this.ye_config);
                         break;
-                    case AudioType.NONE:
+                    case SoundManager.AudioType.NONE:
                         YE.log("浏览器不支持Web Audio和Html5 Audio");
                         return YE.returnForTest;
                         break;
@@ -93,39 +41,74 @@
                         break;
                 }
 
-                _audioObj.load();
+                SoundManager._audioObj.load();
             },
             play: function () {
-                _audioObj.play();
+                SoundManager._audioObj.play();
             },
             getPlayState: function () {
-                return _audioObj.getPlayState();
+                return SoundManager._audioObj.getPlayState();
             },
 
 
-            forTest_setAudioObj: function (obj) {
-                _audioObj = obj;
-            },
-            forTest_setAudioType: function (type) {
-                _audioType = type;
-            },
-            forTest_getAudioTypeEnum: function () {
-                return AudioType;
-            },
-            forTest_getPlayStateEnum: function () {
-                return PlayState;
-            },
             forTest_getAudioBase: function () {
-                return AudioBase;
+                return _AudioBase;
             },
             forTest_getWebAudio: function () {
-                return WebAudio;
+                return _WebAudio;
             },
             forTest_getHtml5Audio: function () {
-                return Html5Audio;
+                return _Html5Audio;
             }
         },
         Static: {
+            _audioType: null,
+            _ctx: null,
+            _audioObj: null,
+            AudioType: {
+                NONE: 0,
+                WEBAUDIO: 1,
+                HTML5AUDIO: 2
+            },
+            PlayState: {
+                NONE: 0,
+                PLAYING: 1,
+                END: 2
+            },
+
+            audioDetect: function () {
+                try {
+                    var contextClass = window.AudioContext ||
+                        window.webkitAudioContext ||
+                        window.mozAudioContext ||
+                        window.oAudioContext ||
+                        window.msAudioContext;
+                    if (contextClass) {
+                        this._ctx = new contextClass();
+                        this._audioType = this.AudioType.WEBAUDIO;
+                    }
+                    else {
+                        this._html5AudioDetect();
+                    }
+                }
+                catch (e) {
+                    this._html5AudioDetect();
+                }
+            },
+            _html5AudioDetect: function () {
+                if (typeof Audio !== "undefined") {
+                    try {
+                        new Audio();
+                        this._audioType = this.AudioType.HTML5AUDIO;
+                    }
+                    catch (e) {
+                        this._audioType = this.AudioType.NONE;
+                    }
+                }
+                else {
+                    this._audioType = this.AudioType.HTML5AUDIO;
+                }
+            },
             create: function (config) {
                 var manager = new this(config);
 
@@ -136,8 +119,10 @@
         }
     });
 
+    SoundManager.audioDetect();
+
     (function () {
-        AudioBase = YYC.AClass({
+        _AudioBase = YYC.AClass({
             Private: {
                 ye_getCanPlayUrl: function () {
                     var self = this,
@@ -219,7 +204,7 @@
             }
         });
 
-        WebAudio = YYC.Class(AudioBase, {
+        _WebAudio = YYC.Class(_AudioBase, {
             Init: function (config) {
                 this.ye__config = config;
 
@@ -247,15 +232,15 @@
                         },
                         error: function () {
                             YE.log("使用Web Audio加载失败！尝试使用Html5 Audio加载");
-                            _audioObj = Html5Audio.create(self.ye__config);
-                            _audioObj.load();
+                            SoundManager._audioObj = _Html5Audio.create(self.ye__config);
+                            SoundManager._audioObj.load();
                         }
                     });
                 },
                 ye__decodeAudioData: function (arraybuffer, obj) {
                     var self = this;
 
-                    _ctx.decodeAudioData(
+                    SoundManager._ctx.decodeAudioData(
                         arraybuffer,
                         function (buffer) {
                             if (buffer) {
@@ -273,19 +258,19 @@
                 initWhenCreate: function () {
                     this.base();
 
-                    this.ye__playState = PlayState.NONE;
+                    this.ye__playState = SoundManager.PlayState.NONE;
                 },
                 load: function () {
                     this.ye__loadBuffer(this, this.ye_P_url);
                 },
                 play: function () {
-                    var source = _ctx.createBufferSource(),
+                    var source = SoundManager._ctx.createBufferSource(),
                         self = this;
 
                     source.buffer = this.ye__buffer;
-                    source.connect(_ctx.destination);
+                    source.connect(SoundManager._ctx.destination);
                     source.start(0);
-                    this.ye__playState = PlayState.PLAYING;
+                    this.ye__playState = SoundManager.PlayState.PLAYING;
 
                     /*!
                      有问题！线程阻塞时可能会不触发onended！
@@ -295,16 +280,11 @@
                      };*/
 
                     setTimeout(function () {
-                        self.ye__playState = PlayState.END;
+                        self.ye__playState = SoundManager.PlayState.END;
                     }, this.ye__buffer.duration * 1000);
                 },
                 getPlayState: function () {
                     return this.ye__playState;
-                },
-
-
-                forTest_setAudioContext: function (ctx) {
-                    _ctx = ctx;
                 }
             },
             Static: {
@@ -318,7 +298,7 @@
             }
         });
 
-        Html5Audio = YYC.Class(AudioBase, {
+        _Html5Audio = YYC.Class(_AudioBase, {
             Init: function (config) {
                 this.ye_P_urlArr = config.urlArr;
                 this.ye__onLoad = config.onLoad;
@@ -380,13 +360,13 @@
                     var playState = 0;
 
                     if (this.ye__audio.ended) {
-                        playState = PlayState.END;
+                        playState = SoundManager.PlayState.END;
                     }
                     else if (this.ye__audio.currentTime > 0) {
-                        playState = PlayState.PLAYING;
+                        playState = SoundManager.PlayState.PLAYING;
                     }
                     else {
-                        playState = PlayState.NONE;
+                        playState = SoundManager.PlayState.NONE;
                     }
 
                     return playState;

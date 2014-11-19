@@ -8,27 +8,11 @@
  * license: MIT
  */
 (function () {
-    var _instance = null;
-
-    var GameState = {
-        NORMAL: 0,
-        PAUSE: 1,
-        END: 2
-    };
-
-    var LoopType = {
-        NONE: 0,
-        REQUESTANIMATIONFRAME: 1,
-        INTERVAL: 2
-    };
-
     YE.Director = YYC.Class(YE.Entity, {
         Init: function () {
             this.base();
         },
         Private: {
-            ye_STARTING_FPS: 60,
-
             ye_startTime: 0,
             ye_lastTime: 0,
 
@@ -68,20 +52,20 @@
                 this.ye_lastTime = time;
             },
             ye_updateFps: function (time) {
-                if (this.ye_loopType === LoopType.INTERVAL) {
+                if (this.ye_loopType === YE.Director.LoopType.INTERVAL) {
                     this.ye_fps = 1 / this.ye_loopInterval;
                     return;
                 }
 
                 if (this.ye_lastTime === 0) {
-                    this.ye_fps = this.ye_STARTING_FPS;
+                    this.ye_fps = YE.Director.STARTING_FPS;
                 }
                 else {
                     this.ye_fps = 1000 / (time - this.ye_lastTime);
                 }
             },
             ye_isToUseIntervalLoop: function () {
-                return this.ye_loopInterval !== 1 / this.ye_STARTING_FPS;
+                return this.ye_loopInterval !== 1 / YE.Director.STARTING_FPS;
             },
             ye_startLoop: function () {
                 var self = this,
@@ -92,7 +76,7 @@
                         self.ye_loopBody(self.ye_getTimeNow());
                     }, this.ye_loopInterval * 1000);
 
-                    this.ye_loopType = LoopType.INTERVAL;
+                    this.ye_loopType = YE.Director.LoopType.INTERVAL;
                 }
                 else {
                     this.ye_endLoop = false;
@@ -112,7 +96,7 @@
                         self.ye_loopId = window.requestNextAnimationFrame(mainLoop);
                     };
                     this.ye_loopId = window.requestNextAnimationFrame(mainLoop);
-                    this.ye_loopType = LoopType.REQUESTANIMATIONFRAME;
+                    this.ye_loopType = YE.Director.LoopType.REQUESTANIMATIONFRAME;
                 }
 
                 this.ye_isRequestAnimFrameLoopAdded = true;
@@ -131,14 +115,14 @@
             gameTime: 0,
 
             initWhenCreate: function () {
-                this.ye_loopInterval = 1 / this.ye_STARTING_FPS;
+                this.ye_loopInterval = 1 / YE.Director.STARTING_FPS;
             },
             runWithScene: function (scene) {
                 scene.init(this);
                 this.setCurrentScene(scene);
 
                 this.ye_startTime = this.ye_getTimeNow();
-                this.ye_gameState = GameState.NORMAL;
+                this.ye_gameState = YE.Director.GameState.NORMAL;
 
                 this.ye_startLoop();
             },
@@ -158,18 +142,18 @@
             },
             getPixPerFrame: function (speed) {
 //                if (YE.main.getConfig().isDebug) {
-                return speed / this.ye_STARTING_FPS;
+                return speed / YE.Director.STARTING_FPS;
 //                }
 //
 //                return speed / this.ye_fps;
             },
             end: function () {
                 this.ye_endNextLoop();
-                this.ye_gameState = GameState.END;
+                this.ye_gameState = YE.Director.GameState.END;
                 YE.Tool.asyn.clearAllTimer(this.ye_timerIndex);
             },
             pause: function () {
-                if (this.ye_gameState === GameState.PAUSE) {
+                if (this.ye_gameState === YE.Director.GameState.PAUSE) {
                     return YE.returnForTest;
                 }
 
@@ -178,16 +162,16 @@
 
                 this.ye_lastLoopInterval = this.ye_loopInterval;
                 this.ye_endNextLoop();
-                this.ye_gameState = GameState.PAUSE;
+                this.ye_gameState = YE.Director.GameState.PAUSE;
             },
             resume: function () {
-                if (this.ye_gameState !== GameState.PAUSE) {
+                if (this.ye_gameState !== YE.Director.GameState.PAUSE) {
                     return YE.returnForTest;
                 }
 
                 this.ye_loopInterval = this.ye_lastLoopInterval;
                 this.ye_restart();
-                this.ye_gameState = GameState.NORMAL;
+                this.ye_gameState = YE.Director.GameState.NORMAL;
             },
             /**
              * 设置主循环间隔时间
@@ -198,7 +182,7 @@
                 this.ye_restart();
             },
             resumeRequestAnimFrameLoop: function () {
-                this.ye_loopInterval = 1 / this.ye_STARTING_FPS;
+                this.ye_loopInterval = 1 / YE.Director.STARTING_FPS;
                 this.ye_restart();
             },
             /**
@@ -207,23 +191,27 @@
              */
             setTimerIndex: function (index) {
                 this.ye_timerIndex = index;
-            },
-
-            //*供测试使用
-            forTest_getGameState: function () {
-                return GameState;
-            },
-            forTest_getLoopType: function () {
-                return LoopType;
             }
         },
         Static: {
+            _instance: null,
+            STARTING_FPS: 60,
+            GameState: {
+                NORMAL: 0,
+                PAUSE: 1,
+                END: 2
+            },
+            LoopType: {
+                NONE: 0,
+                REQUESTANIMATIONFRAME: 1,
+                INTERVAL: 2
+            },
+
             getInstance: function () {
-                if (_instance === null) {
-                    _instance = new this();
-                    _instance.initWhenCreate();
+                if (this._instance === null) {
+                    this._instance = new this();
                 }
-                return _instance;
+                return this._instance;
             }
         }
     });

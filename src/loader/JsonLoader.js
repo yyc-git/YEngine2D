@@ -8,8 +8,6 @@
  * license: MIT
  */
 (function () {
-    var _instance = null;
-
     YE.JsonLoader = YYC.Class(YE.Loader, {
         Init: function () {
             this.base();
@@ -39,11 +37,13 @@
             }
         },
         Static: {
+            _instance: null,
+
             getInstance: function () {
-                if (_instance === null) {
-                    _instance = new this();
+                if (this._instance === null) {
+                    this._instance = new this();
                 }
-                return _instance;
+                return this._instance;
             }
         }
     });

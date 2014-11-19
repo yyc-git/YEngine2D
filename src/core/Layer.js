@@ -8,11 +8,6 @@
  * license: MIT
  */
 (function () {
-    var State = {
-        NORMAL: 0,
-        CHANGE: 1
-    };
-
     YE.Layer = YYC.AClass(YE.NodeContainer, {
         Init: function (id, position) {
             this.base();
@@ -25,10 +20,10 @@
             }
 
             if (this.isChange()) {
-                this.ye___state = State.CHANGE;
+                this.ye___state = YE.Layer.State.CHANGE;
             }
             else {
-                this.ye___state = State.NORMAL;
+                this.ye___state = YE.Layer.State.NORMAL;
             }
         },
         Private: {
@@ -43,10 +38,10 @@
                 this.ye___context = this.ye___canvas.getContext("2d");
             },
             ye___isChange: function () {
-                return this.ye___state === State.CHANGE;
+                return this.ye___state === YE.Layer.State.CHANGE;
             },
             ye___isNormal: function () {
-                return this.ye___state === State.NORMAL;
+                return this.ye___state === YE.Layer.State.NORMAL;
             },
             ye___clearCanvas: function () {
                 var canvasData = this.getCanvasData();
@@ -80,10 +75,10 @@
         },
         Public: {
             setStateNormal: function () {
-                this.ye___state = State.NORMAL;
+                this.ye___state = YE.Layer.State.NORMAL;
             },
             setStateChange: function () {
-                this.ye___state = State.CHANGE;
+                this.ye___state = YE.Layer.State.CHANGE;
             },
             setZIndex: function (zIndex) {
                 this.ye___canvas.style.zIndex = zIndex;
@@ -182,15 +177,14 @@
                 draw: function (context) {
                     this.iterate("draw", [context || this.getContext()]);
                 }
-            },
-
-            //*供测试使用
-
-            forTest_getState: function () {
-                return State;
             }
         },
         Static: {
+            State: {
+                NORMAL: 0,
+                CHANGE: 1
+            },
+
             create: function (id, position) {
                 var T = YYC.Class(YE.Layer, {
                     Init: function () {
