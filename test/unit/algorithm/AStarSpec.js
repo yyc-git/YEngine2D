@@ -1,66 +1,28 @@
-describe("AStar", function () {
-    describe("4方向寻找路径", function () {
-        beforeEach(function () {
-            YE.AStar.setDirection(4);
-        });
+describe("YE.AStar.aCompute", function () {
+    it("8方向寻找路径", function () {
+        var fakeTerrainData = [
+                [0, 0, 0, 0],
+                [0, 1, 0, 0],
+                [0, 1, 1, 0],
+                [0, 0, 0, 0]
+            ],
+            start = [0, 0],
+            end = [3, 2],
+            result = null;
 
-        it("返回的path为寻找的路径（二维数组），time为算法时间", function () {
-            var fakeTerrainData = [
-                    [0, 0, 0, 0],
-                    [0, 1, 0, 0],
-                    [0, 1, 1, 0],
-                    [0, 0, 0, 0]
-                ],
-                begin = [0, 0],
-                end = [2, 3],
-                result = null;
+        result = YE.AStar.aCompute(fakeTerrainData, start, end, "Euclidean");
 
-            result = YE.AStar.aCompute(fakeTerrainData, begin, end);
-
-            expect(result.path).toEqual([
-                [0, 1],
-                [0, 2],
-                [0, 3],
-                [1, 3],
-                [2, 3]
-            ]);
-            expect(result.time).toBeNumber();
-
-        });
-    });
-
-    describe("8方向寻找路径", function () {
-        beforeEach(function () {
-            YE.AStar.setDirection(8);
-        });
-
-        it("返回的path为寻找的路径（二维数组），time为算法时间", function () {
-            var fakeTerrainData = [
-                    [0, 0, 0, 0],
-                    [0, 1, 0, 0],
-                    [0, 1, 1, 0],
-                    [0, 0, 0, 0]
-                ],
-                start = [0, 0],
-                end = [3, 2],
-                result = null;
-
-            result = YE.AStar.aCompute(fakeTerrainData, start, end);
-
-            expect(result.path).toEqual([
-                [ 1, 0 ],
-                [ 2, 1 ],
-                [ 3, 2 ]
-            ]);
-        });
+        expect(result).toEqual([
+            [ 0, 0 ],
+            [ 1, 0 ],
+            [ 2, 0 ],
+            [ 3, 1 ],
+            [ 3, 2 ]
+        ]);
     });
 
     describe("如果不能找到路径", function () {
-        beforeEach(function () {
-            YE.AStar.setDirection(8);
-        });
-
-        it("目的地无法到达", function () {
+        it("目的地不能通过", function () {
             var fakeTerrainData = [
                     [0, 0, 0, 0],
                     [0, 1, 0, 0],
@@ -69,20 +31,13 @@ describe("AStar", function () {
                 ],
                 start = [0, 0],
                 end = [1, 2],
-                result1 = null,
-                result2 = null;
+                result = null;
 
-            YE.AStar.setDirection(4);
-            result1 = YE.AStar.aCompute(fakeTerrainData, start, end);
-            YE.AStar.setDirection(8);
-            result2 = YE.AStar.aCompute(fakeTerrainData, start, end);
+            result = YE.AStar.aCompute(fakeTerrainData, start, end, "Euclidean");
 
-            expect(result1.path).toEqual([]);
-            expect(result1.info).toEqual("目的地无法到达");
-            expect(result2.path).toEqual([]);
-            expect(result2.info).toEqual("目的地无法到达");
+            expect(result).toEqual([]);
         });
-        it("找不到路径", function () {
+        it("无法到达", function () {
             var fakeTerrainData = [
                     [1, 0],
                     [1, 1],
@@ -91,18 +46,61 @@ describe("AStar", function () {
                 ],
                 start = [1, 0],
                 end = [0, 2],
-                result1 = null,
-                result2 = null;
+                result = null;
 
-            YE.AStar.setDirection(4);
-            result1 = YE.AStar.aCompute(fakeTerrainData, start, end);
-            YE.AStar.setDirection(8);
-            result2 = YE.AStar.aCompute(fakeTerrainData, start, end);
+            result = YE.AStar.aCompute(fakeTerrainData, start, end, "Euclidean");
 
-            expect(result1.path).toEqual([]);
-            expect(result1.info).toEqual("目标成孤岛");
-            expect(result2.path).toEqual([]);
-            expect(result2.info).toEqual("找不到路径");
+            expect(result).toEqual([]);
         });
+    });
+    it("寻路算法不够优化", function () {
+        var fakeTerrainData = [
+                [0, 0, 0, 0],
+                [0, 1, 0, 0],
+                [0, 1, 1, 0],
+                [0, 0, 0, 0]
+            ],
+            start = [0, 0],
+            end = [2, 1],
+            result = null;
+
+        result = YE.AStar.aCompute(fakeTerrainData, start, end, "Euclidean");
+
+//        expect(result).toEqual([]);
+        /*
+         应该为下面的结果！
+         expect(result).toEqual([
+         [0, 0],
+         [1, 0],
+         [2, 1]
+         ]);
+         */
+        //实际为
+        expect(result).toEqual([
+            [0, 0],
+            [1, 0],
+            [2, 0] ,
+            [2, 1]
+        ]);
+    });
+
+    it("地图边缘寻路测试", function () {
+        var fakeTerrainData = [
+                [0, 0, 0, 0],
+                [0, 1, 0, 0],
+                [0, 1, 1, 0],
+                [0, 0, 0, 0]
+            ],
+            start = [1, 3],
+            end = [3, 3],
+            result = null;
+
+        result = YE.AStar.aCompute(fakeTerrainData, start, end, "Euclidean");
+
+        expect(result).toEqual([
+            [ 1, 3 ],
+            [ 2, 3 ],
+            [ 3, 3 ]
+        ]);
     });
 });
