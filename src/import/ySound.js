@@ -11,7 +11,8 @@
     //todo 增加cache机制
     //todo 增强浏览器兼容性
 
-    //内部类变量不作为SoundManager的静态成员，因为内部类变量不是设计为全局共享的
+    //因为内部类与SoundManager是平级的，不属于SoundManager，所以不作为SoundManager的静态成员
+    //todo 如果声音库变得更为复杂，则有必要将库提出作为独立的库，并增加独立的命名空间，内部类暴露给命名空间，成为外部类。
     var _AudioBase = null,
         _WebAudio = null,
         _Html5Audio = null;

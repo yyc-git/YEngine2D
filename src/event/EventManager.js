@@ -52,7 +52,7 @@
 
             return eventType;
         },
-        addListener: function (event, handler, eventContext, handlerContext) {
+        addListener: function (event, handler, target, handlerContext) {
             var eventType = "",
                 _handler = null;
 
@@ -65,17 +65,17 @@
                 _handler = handler;
             }
 
-            YE.Tool.event.addEvent(eventContext || window, eventType, _handler);
-            this._registerEvent(eventType, _handler, eventContext || window);
+            YE.Tool.event.addEvent(target || window, eventType, _handler);
+            this._registerEvent(eventType, _handler, target || window);
         },
-        _registerEvent: function (eventType, handler, eventContext) {
+        _registerEvent: function (eventType, handler, target) {
             if (this.ye_keyListeners[eventType] === undefined) {
                 this.ye_keyListeners[eventType] = [
-                    [handler, eventContext]
+                    [handler, target]
                 ];
             }
             else {
-                this.ye_keyListeners[eventType].push([handler, eventContext]);
+                this.ye_keyListeners[eventType].push([handler, target]);
             }
         },
         removeListener: function (event) {

@@ -116,6 +116,7 @@
 
             initWhenCreate: function () {
                 this.ye_loopInterval = 1 / YE.Director.STARTING_FPS;
+                this.ye_fps = YE.Director.STARTING_FPS;
             },
             runWithScene: function (scene) {
                 scene.init(this);

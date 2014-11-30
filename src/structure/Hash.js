@@ -45,11 +45,11 @@
             },
             forEach: function (fn, context) {
                 var i = null,
-                    layers = this.getChilds();
+                    childs = this.ye_childs;
 
-                for (i in layers) {
-                    if (layers.hasOwnProperty(i)) {
-                        if (fn.call(context, layers[i], i) === $break) {
+                for (i in childs) {
+                    if (childs.hasOwnProperty(i)) {
+                        if (fn.call(context, childs[i], i) === $break) {
                             break;
                         }
                     }
@@ -57,11 +57,11 @@
             },
             map: function (handlerName, argArr) {
                 var i = null,
-                    layers = this.getChilds();
+                    childs = this.ye_childs;
 
-                for (i in layers) {
-                    if (layers.hasOwnProperty(i)) {
-                        layers[i][handlerName].apply(layers[i], argArr);
+                for (i in childs) {
+                    if (childs.hasOwnProperty(i)) {
+                        childs[i][handlerName].apply(childs[i], argArr);
                     }
                 }
             }

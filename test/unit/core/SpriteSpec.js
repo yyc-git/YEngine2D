@@ -1134,5 +1134,4 @@ describe("Sprite.js", function () {
             expect(sprite.onAfterDraw).toBeExist();
         });
     });
-
 });

@@ -444,5 +444,10 @@ describe("Director", function () {
 
             expect(director.ye_loopInterval).toEqual(1 / YE.Director.STARTING_FPS);
         });
+        it("初始化fps", function () {
+            director.initWhenCreate();
+
+            expect(director.ye_fps).toEqual(YE.Director.STARTING_FPS);
+        });
     });
 });
