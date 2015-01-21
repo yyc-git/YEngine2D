@@ -286,7 +286,8 @@
             "action/JumpBy.js",
             "action/Place.js",
 
-            "ui/Graphics.js"
+            "ui/Graphics.js",
+            "ui/Text.js"
         ],
         ye_isLoaded: false,
 

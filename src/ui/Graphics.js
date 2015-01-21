@@ -36,42 +36,42 @@
             setContext: function (context) {
                 this.ye_context = context;
             },
-            drawPolygon: function (style, lineWidth, polygon) {
+            drawPolygon: function (style, lineWidth, polygonPointArr) {
                 var i = 0,
-                    len = polygon.length;
+                    len = polygonPointArr.length;
 
                 this.ye_context.strokeStyle = style;
                 this.ye_context.lineWidth = lineWidth;
 
                 this.ye_context.beginPath();
 
-                this.ye_context.moveTo(polygon[0][0], polygon[0][1]);
+                this.ye_context.moveTo(polygonPointArr[0][0], polygonPointArr[0][1]);
 
                 for (i = 1; i < len; i++) {
-                    this.ye_context.lineTo(polygon[i][0], polygon[i][1]);
+                    this.ye_context.lineTo(polygonPointArr[i][0], polygonPointArr[i][1]);
                 }
 
-                this.ye_context.lineTo(polygon[0][0], polygon[0][1]);
+                this.ye_context.lineTo(polygonPointArr[0][0], polygonPointArr[0][1]);
 
                 this.ye_context.closePath();
 
                 this.ye_context.stroke();
             },
-            fillPolygon: function (style, polygon) {
+            fillPolygon: function (style, polygonPointArr) {
                 var i = 0,
-                    len = polygon.length;
+                    len = polygonPointArr.length;
 
                 this.ye_context.fillStyle = style;
 
                 this.ye_context.beginPath();
 
-                this.ye_context.moveTo(polygon[0][0], polygon[0][1]);
+                this.ye_context.moveTo(polygonPointArr[0][0], polygonPointArr[0][1]);
 
                 for (i = 1; i < len; i++) {
-                    this.ye_context.lineTo(polygon[i][0], polygon[i][1]);
+                    this.ye_context.lineTo(polygonPointArr[i][0], polygonPointArr[i][1]);
                 }
 
-                this.ye_context.lineTo(polygon[0][0], polygon[0][1]);
+                this.ye_context.lineTo(polygonPointArr[0][0], polygonPointArr[0][1]);
 
                 this.ye_context.closePath();
 
