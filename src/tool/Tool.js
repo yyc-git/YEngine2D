@@ -786,6 +786,51 @@
                     var path = $("script[src*='" + jsName + "']").attr("src");
 
                     return path.substring(0, path.lastIndexOf("/") + 1);
+                },
+                //todo 待单元测试和重构
+
+                isPath: function (pathStr) {
+                      return this.extname(pathStr) !== null;
+                },
+
+                //来自cocos2d
+
+                /**
+                 * Get the ext name of a path.
+                 * @example
+                 cc.path.extname("a/b.png");//-->".png"
+                 cc.path.extname("a/b.png?a=1&b=2");//-->".png"
+                 cc.path.extname("a/b");//-->null
+                 cc.path.extname("a/b?a=1&b=2");//-->null
+                 * @param {string} pathStr
+                 * @returns {*}
+                 */
+                extname: function (pathStr) {
+                    var temp = /(\.[^\.\/\?\\]*)(\?.*)?$/.exec(pathStr);
+                    return temp ? temp[1] : null;
+                },
+                /**
+                 * Get the file name of a file path.
+                 * @example
+                 cc.path.basename("a/b.png");//-->"b.png"
+                 cc.path.basename("a/b.png?a=1&b=2");//-->"b.png"
+                 cc.path.basename("a/b.png", ".png");//-->"b"
+                 cc.path.basename("a/b.png?a=1&b=2", ".png");//-->"b"
+                 cc.path.basename("a/b.png", ".txt");//-->"b.png"
+                 * @param {string} pathStr
+                 * @param {string} [extname]
+                 * @returns {*}
+                 */
+                basename: function (pathStr, extname) {
+                    var index = pathStr.indexOf("?");
+                    if (index > 0) pathStr = pathStr.substring(0, index);
+                    var reg = /(\/|\\\\)([^(\/|\\\\)]+)$/g;
+                    var result = reg.exec(pathStr.replace(/(\/|\\\\)$/, ""));
+                    if (!result) return null;
+                    var baseName = result[2];
+                    if (extname && pathStr.substring(pathStr.length - extname.length).toLowerCase() == extname.toLowerCase())
+                        return baseName.substring(0, baseName.length - extname.length);
+                    return baseName;
                 }
             };
         }());
@@ -909,7 +954,7 @@
                             tags.forEach(function (tag) {
                                 childTag.forEach(function (t) {
                                     if (t === tag) {
-                                        func&&func(child);
+                                        func && func(child);
                                         throw breakOuter;
                                     }
                                 });

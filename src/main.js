@@ -246,9 +246,9 @@
 
             "loader/Loader.js"  ,
             "loader/ImgLoader.js" ,
-
             "loader/JsonLoader.js",
             "loader/SoundLoader.js",
+            "loader/FontLoader.js",
             "loader/LoaderManager.js" ,
 
             "sound/SoundManager.js"  ,

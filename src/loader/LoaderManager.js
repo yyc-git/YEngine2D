@@ -63,6 +63,10 @@
                             YE.SoundLoader.getInstance().load(res.url, res.id);
                             self.ye_resCount += 1;
                             break;
+                        case "font":
+                            YE.FontLoader.getInstance().load(res.url, res.id);
+                            self.ye_resCount += 1;
+                            break;
                         default:
                             YE.error(true, "type错误");
                             break;

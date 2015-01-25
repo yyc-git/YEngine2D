@@ -100,7 +100,7 @@
                                     success(eval("(" + xhr.responseText + ")"));
                                 }
                             }
-                            else if(_isSoundFile(dataType)){
+                            else if (_isSoundFile(dataType)) {
                                 if (success !== null) {//将json字符串转换为js对象
                                     success(xhr.response);
                                 }
@@ -138,6 +138,11 @@
 
             return ajax;
         }());
+
+        //todo 待单元测试
+        YEQuery.newElement = function (eleStr) {
+            return document.createElement(eleStr);
+        };
 
         YEQuery.prototype = {
             /**
