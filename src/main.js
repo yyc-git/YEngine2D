@@ -250,6 +250,8 @@
             "loader/SoundLoader.js",
             "loader/FontLoader.js",
             "loader/LoaderManager.js" ,
+            "loader/Boot.js",
+            "loader/fntLoader.js",
 
             "sound/SoundManager.js"  ,
 
@@ -287,7 +289,8 @@
             "action/Place.js",
 
             "ui/Graphics.js",
-            "ui/Text.js"
+            "ui/Text.js",
+            "ui/TextImg.js"
         ],
         ye_isLoaded: false,
 

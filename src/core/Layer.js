@@ -60,15 +60,36 @@
         },
         Protected: {
             ye_P_run: function () {
-                this.iterate("update");
+                //todo 待重构
 
-                if (this.ye___isChange()) {
-                    this.clear();
-                    this.iterate("onBeforeDraw", [this.getContext()]);
-                    this.draw(this.getContext());
-                    this.iterate("onAfterDraw", [this.getContext()]);
-                    this.setStateNormal();
+                var layerChilds = this.getChilds().filter(function (child) {
+                    return child.isInstanceOf(YE.NodeContainer);
+                });
+                var spriteChilds = this.getChilds().filter(function (child) {
+                    return child.isInstanceOf(YE.Sprite);
+                });
+
+                layerChilds.map("run", [this.getContext()]);
+
+
+                if(spriteChilds.length > 0){
+                    spriteChilds.map("update");
+
+                    if (this.ye___isChange()) {
+                        this.clear();
+                        spriteChilds.map("onBeforeDraw", [this.getContext()]);
+
+
+//                    this.draw(this.getContext());
+                        spriteChilds.map("draw", [this.getContext()]);
+
+
+                        spriteChilds.map("onAfterDraw", [this.getContext()]);
+                        this.setStateNormal();
+                    }
                 }
+
+
 
                 this.change();
             }

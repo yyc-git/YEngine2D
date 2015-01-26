@@ -831,6 +831,53 @@
                     if (extname && pathStr.substring(pathStr.length - extname.length).toLowerCase() == extname.toLowerCase())
                         return baseName.substring(0, baseName.length - extname.length);
                     return baseName;
+                },
+                /**
+                 * Change extname of a file path.
+                 * @example
+                 cc.path.changeExtname("a/b.png", ".plist");//-->"a/b.plist"
+                 cc.path.changeExtname("a/b.png?a=1&b=2", ".plist");//-->"a/b.plist?a=1&b=2"
+                 * @param {string} pathStr
+                 * @param {string} [extname]
+                 * @returns {string}
+                 */
+                changeExtname: function (pathStr, extname) {
+                    extname = extname || "";
+                    var index = pathStr.indexOf("?");
+                    var tempStr = "";
+                    if (index > 0) {
+                        tempStr = pathStr.substring(index);
+                        pathStr = pathStr.substring(0, index);
+                    }
+                    index = pathStr.lastIndexOf(".");
+                    if (index < 0) return pathStr + extname + tempStr;
+                    return pathStr.substring(0, index) + extname + tempStr;
+                },
+                /**
+                 * Change file name of a file path.
+                 * @example
+                 cc.path.changeBasename("a/b/c.plist", "b.plist");//-->"a/b/b.plist"
+                 cc.path.changeBasename("a/b/c.plist?a=1&b=2", "b.plist");//-->"a/b/b.plist?a=1&b=2"
+                 cc.path.changeBasename("a/b/c.plist", ".png");//-->"a/b/c.png"
+                 cc.path.changeBasename("a/b/c.plist", "b");//-->"a/b/b"
+                 cc.path.changeBasename("a/b/c.plist", "b", true);//-->"a/b/b.plist"
+                 * @param {String} pathStr
+                 * @param {String} basename
+                 * @param {Boolean} [isSameExt]
+                 * @returns {string}
+                 */
+                changeBasename: function (pathStr, basename, isSameExt) {
+                    if (basename.indexOf(".") == 0) return this.changeExtname(pathStr, basename);
+                    var index = pathStr.indexOf("?");
+                    var tempStr = "";
+                    var ext = isSameExt ? this.extname(pathStr) : "";
+                    if (index > 0) {
+                        tempStr = pathStr.substring(index);
+                        pathStr = pathStr.substring(0, index);
+                    }
+                    index = pathStr.lastIndexOf("/");
+                    index = index <= 0 ? 0 : index + 1;
+                    return pathStr.substring(0, index) + basename + ext + tempStr;
                 }
             };
         }());
