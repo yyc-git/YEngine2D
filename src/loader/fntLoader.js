@@ -34,6 +34,13 @@ YE.fntLoader = {
      * @returns {{}}
      */
     parseFnt: function (fntStr, url) {
+        /*!
+         xAdvance:绘制完当前字后，光标向后移多少像素以绘制下一个字
+         xOffset:当前字在绘制时的像素偏移横向位置
+         yOffset:当前字在绘制时的像素偏移纵向位置
+         */
+
+
         var self = this, fnt = {};
 
         //padding

@@ -92,11 +92,13 @@
                 }
             },
 
+            //todo 设置width, alignment, imageOffset
 
             initWhenCreate: function (str, id) {
                 var self = this;
 
-                //todo 显示多个字符时，重叠到一起了！需要解决
+
+                //todo 暂不支持kerning
 
                 if (id) {
 //                    var newConf = cc.loader.getRes(fntFile);
@@ -110,11 +112,16 @@
 
                     var img = YE.ImgLoader.getInstance().get(id + "_image");
 
-                    //todo charCode===10 换行？
+                    //todo 待处理换行的情况？
+                    //todo 待研究cocos2d位置的计算nextFontPositionX/Y
 
                     var stringLen = str.length;
                     var locStr = str;
                     var locFontDict = newConf.fontDefDictionary;
+                    var nextFontPositionX = 0,
+                        nextFontPositionY = 0;
+
+                    var locCfg = newConf;
 
                     for (var i = 0; i < stringLen; i++) {
                         var key = locStr.charCodeAt(i);
@@ -123,7 +130,8 @@
 //                        if (key === 10) {
 //                            //new line
 //                            nextFontPositionX = 0;
-//                            nextFontPositionY -= locCfg.commonHeight;
+////                            nextFontPositionY -= locCfg.commonHeight;
+//
 //                            continue;
 //                        }
 
@@ -154,11 +162,12 @@
 
                             fontChar = YE.Sprite.create(frame);
 
-                            //todo 大小为size？
-                            //暂时设为commonHeight
 
-                            fontChar.setWidth(newConf.commonHeight);
-                            fontChar.setHeight(newConf.commonHeight);
+//                            fontChar.setWidth(newConf.commonHeight);
+//                            fontChar.setHeight(newConf.commonHeight);
+
+                            fontChar.setWidth(rect.size.width);
+                            fontChar.setHeight(rect.size.height);
 
                             this.addChild(fontChar, 0, i);
 
@@ -166,6 +175,13 @@
 //                        else{
 //                            this._renderCmd._updateCharTexture(fontChar, rect, key);
 //                        }
+
+
+
+
+                        fontChar.setPosition(nextFontPositionX + fontDef.xOffset, nextFontPositionY + fontDef.yOffset);
+
+                        nextFontPositionX =  nextFontPositionX + fontDef.xAdvance;
                     }
 
                     //todo 如何setPosition
@@ -173,6 +189,8 @@
                     //todo 设置偏移量，xAdvance等
 
                     //todo updateLabel
+                    //处理多行、空格、超出宽度（需要换行）
+                    //处理对齐
 
 
 //                    self._config = newConf;
