@@ -65,7 +65,9 @@
                     if (zOrder) {
                         child.ye_setZOrder(zOrder);
                     }
-                    if (tag) {
+                    //todo 待测试
+                    //tag可为0
+                    if (tag !== undefined || tag !== null) {
                         child.addTag(tag);
                     }
                     child.init(self);
@@ -79,7 +81,9 @@
                     this.ye__isChangeZOrder = true;
                     child.ye_setZOrder(zOrder);
                 }
-                if (tag) {
+                //todo 待测试
+                //tag可为0
+                if (tag !== undefined || tag !== null) {
                     child.addTag(tag);
                 }
                 child.init(this);
