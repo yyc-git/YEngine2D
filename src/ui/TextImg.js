@@ -20,6 +20,10 @@
 ////        "getChildByTag"
 //    );
 
+//    YE.CharType = {
+//        NEWLINE: "/n"
+//    };
+
 
     YE.TextImg = YYC.Class({Class: YE.NodeContainer}, {
         Init: function (string, maxWidth) {
@@ -36,12 +40,15 @@
 //                return YE.Tool.path.basename(fontPath, YE.Tool.path.extname(fontPath));
 //            }
 
-            //Checking whether the character is a whitespace
-//            ye_isspace_unicode: function (charCode) {
+//            //Checking whether the character is a whitespace
+//            ye_isSpaceUnicode: function (charCode) {
 //                return  ((charCode >= 9 && charCode <= 13) || charCode == 32 || charCode == 133 || charCode == 160 || charCode == 5760
 //                    || (charCode >= 8192 && charCode <= 8202) || charCode == 8232 || charCode == 8233 || charCode == 8239
 //                    || charCode == 8287 || charCode == 12288);
 //            },
+            ye_isNewline: function (charCode) {
+                return charCode == 10;
+            },
             ye_getLetterPosXLeft: function (sp) {
 //                return sp.getPositionX() * this._scaleX - (sp._getWidth() * this._scaleX * sp._getAnchorX());
                 return sp.startPosX;
@@ -76,7 +83,7 @@
                 var nextFontPositionX = 0,
                     nextFontPositionY = 0;
 
-//                var locCfg = fntObj;
+                var locCfg = fntObj;
 
                 for (var i = 0; i < stringLen; i++) {
                     var key = locStr.charCodeAt(i);
@@ -84,13 +91,48 @@
                     //todo 什么情况下会为0？
 //                    if (key == 0) continue;
 
-//                        if (key === 10) {
+//                        if (this.ye_isNewline(key)) {
 //                            //new line
 //                            nextFontPositionX = 0;
 ////                            nextFontPositionY -= locCfg.commonHeight;
+//                            nextFontPositionY +-= locCfg.commonHeight;
 //
 //                            continue;
 //                        }
+
+
+                    if (this.ye_isNewline(key)) {
+                        var fontChar = self.getChildByTag(i);
+
+
+                        if (!fontChar) {
+                            fontChar = YE.Sprite.create();
+                        }
+
+                        fontChar.char = locStr[i];
+
+
+                        this.addChild(fontChar, 0, i);
+
+//                        else{
+//                            this._renderCmd._updateCharTexture(fontChar, rect, key);
+//                        }
+
+
+//                        fontChar.setPosition(nextFontPositionX + fontDef.xOffset, nextFontPositionY + fontDef.yOffset);
+//
+//                        fontChar.startPosX = nextFontPositionX;
+//                        fontChar.xAdvance = fontDef.xAdvance;
+
+
+//                        nextFontPositionX = nextFontPositionX + fontDef.xAdvance;
+
+                        nextFontPositionX = 0;
+////                            nextFontPositionY -= locCfg.commonHeight;
+                        nextFontPositionY = nextFontPositionY + locCfg.commonHeight;
+
+                        continue;
+                    }
 
 
 //                        var kerningAmount = locKerningDict[(prev << 16) | (key & 0xffff)] || 0;
@@ -101,9 +143,9 @@
                     }
 
 //                    //如果为空白符，则不创建对应的精灵，右移x坐标（空格也是一个字符，应该包含在fnt文件中）
-//                    if (this.ye_isspace_unicode(key)) {
+//                    if (this.ye_isSpaceUnicode(key)) {
 //                        nextFontPositionX = nextFontPositionX + fontDef.xAdvance;
-//                        this.ye_space_xAdvance = fontDef.xAdvance;
+////                        this.ye_space_xAdvance = fontDef.xAdvance;
 //                        continue;
 //                    }
 
@@ -263,6 +305,12 @@
 //                            continue;
 //                        }
 
+
+
+                        if(this.ye_isNewline(characterSprite.char.charCodeAt(0))){
+                            x = 0;
+                        }
+
                         // Out of bounds.
 //                        if (self._getLetterPosXRight(characterSprite) - startOfLine > self.ye_maxWidth) {
 
@@ -272,7 +320,6 @@
                         if (this.ye_getLetterPosXRight(characterSprite) - x > this.ye_maxWidth) {
                             //todo 实现空格不能导致换行的设置
                             //先实现空格可以导致换行（lineBreakWithoutSpaces）的情况
-
 
 
 //                            lastCharSprite = this.getChildByTag(i - 1);
