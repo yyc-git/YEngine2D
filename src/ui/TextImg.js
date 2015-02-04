@@ -24,30 +24,47 @@
 //        NEWLINE: "/n"
 //    };
 
+    YE.TEXT_XALIGNMENT = {
+        LEFT: 0,
+        CENTER: 1,
+        RIGHT: 2
+    };
+    YE.TEXT_YALIGNMENT = {
+        TOP: 0,
+        MIDDLE: 1,
+        BOTTOM: 2
+    };
+
 
     YE.TextImg = YYC.Class({Class: YE.NodeContainer}, {
-        Init: function (string, maxWidth) {
+        Init: function (string, maxWidth, xAlignment) {
             this.base();
 
             this.ye_string = string;
             this.ye_maxWidth = maxWidth || 0;
+            this.ye_xAlignment = xAlignment || YE.TEXT_XALIGNMENT.LEFT;
         },
         Private: {
             ye_string: null,
             ye_maxWidth: null,
+            ye_xAlignment: null,
 //
 //            ye_getFontName: function (fontPath) {
 //                return YE.Tool.path.basename(fontPath, YE.Tool.path.extname(fontPath));
 //            }
 
-//            //Checking whether the character is a whitespace
-//            ye_isSpaceUnicode: function (charCode) {
-//                return  ((charCode >= 9 && charCode <= 13) || charCode == 32 || charCode == 133 || charCode == 160 || charCode == 5760
-//                    || (charCode >= 8192 && charCode <= 8202) || charCode == 8232 || charCode == 8233 || charCode == 8239
-//                    || charCode == 8287 || charCode == 12288);
-//            },
-            ye_isNewline: function (charCode) {
-                return charCode == 10;
+            //Checking whether the character is a whitespace
+            ye_isSpaceUnicode: function (char) {
+                var charCode = char.charCodeAt(0);
+
+                return  (
+//                    (charCode >= 9 && charCode <= 13)   //要排除10（newline）这种情况
+                    charCode == 32 || charCode == 133 || charCode == 160 || charCode == 5760
+                        || (charCode >= 8192 && charCode <= 8202) || charCode == 8232 || charCode == 8233 || charCode == 8239
+                        || charCode == 8287 || charCode == 12288);
+            },
+            ye_isNewline: function (char) {
+                return char.charCodeAt(0) == 10;
             },
             ye_getLetterPosXLeft: function (sp) {
 //                return sp.getPositionX() * this._scaleX - (sp._getWidth() * this._scaleX * sp._getAnchorX());
@@ -65,7 +82,7 @@
              ////如str = "1 a";
              ////那么getChildByTag(0)对应“1”，getChildByTag(1)对应空格（没有精灵，为null），getChildByTag(2)对应“a”
 
-             空白字符也有对应的精灵
+             空白符、换行符都有对应的精灵
 
              */
 
@@ -101,7 +118,7 @@
 //                        }
 
 
-                    if (this.ye_isNewline(key)) {
+                    if (this.ye_isNewline(locStr[i])) {
                         var fontChar = self.getChildByTag(i);
 
 
@@ -119,10 +136,10 @@
 //                        }
 
 
-//                        fontChar.setPosition(nextFontPositionX + fontDef.xOffset, nextFontPositionY + fontDef.yOffset);
+                        fontChar.setPosition(nextFontPositionX, nextFontPositionY);
 //
-//                        fontChar.startPosX = nextFontPositionX;
-//                        fontChar.xAdvance = fontDef.xAdvance;
+                        fontChar.startPosX = nextFontPositionX;
+                        fontChar.xAdvance = 0;
 
 
 //                        nextFontPositionX = nextFontPositionX + fontDef.xAdvance;
@@ -229,6 +246,7 @@
 
                     var lineHeight = fntObj.commonHeight;
 
+                    //todo 改为iterate
 
                     //这里遍历string而不是遍历childs，是为了获得正确的序号index，从而能获得对应字符的精灵
                     for (var i = 0, lj = self.ye_string.length; i < lj; i++) {
@@ -306,8 +324,33 @@
 //                        }
 
 
+                        if (this.ye_isNewline(characterSprite.char)) {
 
-                        if(this.ye_isNewline(characterSprite.char.charCodeAt(0))){
+
+                            //newline和fullline标志应该放在行最后一个字符
+
+
+                            characterSprite.newline = true;
+
+
+//                            if (this.getChildByTag(i + 1)) {
+//                                var nextSpriteXVdance = this.getChildByTag(i + 1).xAdvance;
+//                            }
+//                            else {
+//                                var nextSpriteXVdance = 0;
+//                            }
+//
+//                            if (this.ye_getLetterPosXRight(characterSprite) - x + nextSpriteXVdance > this.ye_maxWidth) {
+//                                characterSprite.fullLine = true;
+//                            }
+
+                            //主动回车的字符，fullline为false
+                            characterSprite.fullLine = false;
+
+
+                            characterSprite.setPosition(characterSprite.getPositionX() - x,
+                                characterSprite.getPositionY() + y);
+
                             x = 0;
                         }
 
@@ -317,7 +360,7 @@
 //                        if (this.ye_isOutOfBounds()) {
 
 
-                        if (this.ye_getLetterPosXRight(characterSprite) - x > this.ye_maxWidth) {
+                        else if (this.ye_getLetterPosXRight(characterSprite) - x > this.ye_maxWidth) {
                             //todo 实现空格不能导致换行的设置
                             //先实现空格可以导致换行（lineBreakWithoutSpaces）的情况
 
@@ -330,6 +373,40 @@
 //                            else{
 //
 //                            }
+
+
+                            if (this.getChildByTag(i - 1)) {
+                                var prevCharSprite = this.getChildByTag(i - 1);
+
+
+                                prevCharSprite.newline = true;
+
+
+////                                if (this.ye_getLetterPosXRight(prevCharSprite) - x + characterSprite.xAdvance > this.ye_maxWidth) {
+//                                prevCharSprite.fullLine = true;
+////                                }
+
+                                //如果前一个字符是空格字符（即行最后字符为空格字符），则行不算fullline（因为在对齐时会将行最后的空格字符去掉）
+                                 if(!this.ye_isSpaceUnicode(prevCharSprite.char)){
+                                     prevCharSprite.fullLine = true;
+                                 }
+
+                            }
+
+//                            characterSprite.newline = true;
+
+
+//                            if (this.getChildByTag(i + 1)) {
+//                                var nextSpriteXVdance = this.getChildByTag(i + 1).xAdvance;
+//                            }
+//                            else {
+//                                var nextSpriteXVdance = 0;
+//                            }
+//
+//                            if (this.ye_getLetterPosXRight(characterSprite) - x + nextSpriteXVdance > this.ye_maxWidth) {
+//                                characterSprite.fullLine = true;
+//                            }
+
 
                             x = this.ye_getLetterPosXLeft(characterSprite);
 
@@ -405,6 +482,116 @@
 //                    //this.updateString(true);
 //                    self._setString(str_new, false)
                 }
+
+
+                //处理对齐
+
+                //以行为单位进行遍历
+                //如果该行满员，则不处理
+                //否则，根据对齐方式，调整该行的字符位置（不会换行）
+
+                //换行的最后一个字符设置为换行标志，并设置该行是否满员的标志。
+
+
+
+                if (this.ye_xAlignment != YE.TEXT_XALIGNMENT.LEFT) {
+                    var line = [];
+
+                    //行可以全为空格，对齐时不将空行去掉！如："     2"，则第一行为空
+
+                    //行最后的空格不算
+
+                    this.iterate(function (characterSprite) {
+
+
+
+
+
+
+
+//                        if (!this.ye_isNewline(characterSprite.char)) {
+                        if (!characterSprite.newline) {
+                            line.push(characterSprite);
+                            return;
+                        }
+
+                        if (characterSprite.newline && characterSprite.fullLine) {
+                            line = [];
+                            return;
+                        }
+
+
+                        //newline, not full line
+//                        line.push(characterSprite);
+                        self.ye_alignLine(line, line[line.length - 1]);
+
+                        line = [];
+                    });
+
+                    //处理最后一行
+                    if (line.length > 0) {
+                        self.ye_alignLine(line, line[line.length - 1]);
+                    }
+                }
+            },
+            ye_alignLine: function (line, lastCharSprite) {
+                var self = this;
+//                    line = line.filter(function (cp) {
+//                        return !self.ye_isSpaceUnicode(cp.char);
+//
+//                    });
+
+
+                line = this.ye_trimBottomSpaceChar(line);
+
+                lastCharSprite = line[line.length - 1];
+
+                line.forEach(function (cp) {
+                    var shift = null;
+
+                    var lineWidth = self.ye_getLetterPosXRight(lastCharSprite);
+
+                    switch (self.ye_xAlignment) {
+                        case YE.TEXT_XALIGNMENT.CENTER:
+                            shift = (self.ye_maxWidth - lineWidth) / 2;
+                            break;
+                        case YE.TEXT_XALIGNMENT.RIGHT:
+                            shift = self.ye_maxWidth - lineWidth;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    cp.setPositionX(cp.getPositionX() + shift);
+                });
+            },
+            ye_trimBottomSpaceChar: function (line) {
+                var i = line.length - 1;
+
+//                for (i = line.length; i >= 0; i--) {
+//
+//                }
+
+//                var temp = null;
+
+                if(this.ye_isNewline(line[i].char)){
+//                    temp = line[i];
+
+                    i = i - 1;
+                }
+
+                while(i >= 0 && this.ye_isSpaceUnicode(line[i].char)){
+                       i = i - 1;
+                }
+
+                line = line.splice(0, i + 1);
+
+                return line;
+//
+//                line = line.filter(function (cp) {
+//                    return !self.ye_isSpaceUnicode(cp.char);
+//
+//                });
             }
         },
         Protected: {
@@ -453,7 +640,7 @@
                 }
             },
 
-            //todo 设置width, alignment, imageOffset
+            //todo 设置width, xAlignment, imageOffset
 
             initWhenCreate: function (id) {
                 //todo 暂不支持kerning
@@ -545,8 +732,8 @@
 //            }
         },
         Static: {
-            create: function (str, id, maxWidth) {
-                var text = new this(str, maxWidth);
+            create: function (str, id, maxWidth, xAlignment) {
+                var text = new this(str, maxWidth, xAlignment);
 
                 text.initWhenCreate(id);
 

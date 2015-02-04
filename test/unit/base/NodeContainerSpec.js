@@ -395,7 +395,23 @@ describe("NodeContainer", function () {
 
 
     describe("iterate", function () {
-        it("调用容器元素的方法，可传入参数", function () {
+        it("可遍历容器元素，可设置this", function () {
+            var child1 = null,
+                child2 = null;
+
+            var a = [1,2]
+            child1 = sandbox.createSpyObj("draw");
+            child2 = sandbox.createSpyObj("draw");
+            addChilds([child1, child2]);
+
+            container.iterate(function(child, index){
+                child.draw(this[index]);
+            }, a);
+
+            expect(child1.draw).toCalledWith(1);
+            expect(child2.draw).toCalledWith(2);
+        });
+        it("可调用容器元素的方法，可传入参数", function(){
             var child1 = null,
                 child2 = null;
 
