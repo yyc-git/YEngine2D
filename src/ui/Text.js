@@ -19,28 +19,318 @@
         "setPosition");
 
 
+    var _textAlign = ["left", "center", "right"];
+    var _textBaseline = ["top", "middle", "bottom"];
+
+
+
+//Support: English French German
+//Other as Oriental Language
+    //todo 暂时仅支持English，删除French、German的支持
+
+    var _wordRex = /([a-zA-Z0-9ÄÖÜäöüßéèçàùêâîôû]+|\S)/;
+    var _symbolRex = /^[!,.:;}\]%\?>、‘“》？。，！]/;
+    var _lastWordRex = /([a-zA-Z0-9ÄÖÜäöüßéèçàùêâîôû]+|\S)$/;
+    var _lastEnglish = /[a-zA-Z0-9ÄÖÜäöüßéèçàùêâîôû]+$/;
+    var _firsrEnglish = /^[a-zA-Z0-9ÄÖÜäöüßéèçàùêâîôû]/;
+
+
+
+
+
+    //todo 如何消除字体变更的闪动（用户可看到从默认字体变到指定字体的闪动）
+
     YE.Text = YYC.Class({Class: YE.Node, Interface: IText}, {
-        Init: function (string, fontPath, fontSize) {
+        Init: function (string, fontPath, fontSize, dimensions, xAlignment, yAlignment) {
             this.base();
 
             this.ye_string = string;
             this.ye_fontPath = fontPath || "sans-serif";
             this.ye_fontSize = fontSize || 10;
+            this.ye_dimensions = dimensions;
+            this.ye_xAlignment = xAlignment || YE.TEXT_XALIGNMENT.LEFT;
+            this.ye_yAlignment = yAlignment || YE.TEXT_YALIGNMENT.TOP;
         },
         Private: {
             ye_string: null,
+            ye_strArr: null,
             ye_fontPath: null,
             ye_fontName: null,
             ye_fontSize: null,
+            ye_dimensions: null,
+            ye_xAlignment: null,
+            ye_yAlignment: null,
             ye_x: null,
             ye_y: null,
             ye_strokeEnabled: null,
             ye_fillEnabled: null,
             ye_strokeStyle: null,
             ye_strokeSize: null,
+            ye_context: null,
 
             ye_getFontName: function (fontPath) {
                 return YE.Tool.path.basename(fontPath, YE.Tool.path.extname(fontPath));
+            },
+            ye_formatText: function () {
+                if(this.ye_dimensions.width !== 0){
+                    this.ye_strArr = this.ye_string.split('\n');
+//
+                    for (i = 0; i < this.ye_strArr.length; i++) {
+//                        this._checkWarp(this._strings, i, locDimensionsWidth);
+                         this.ye_formatMultiLine(this.ye_strArr, i, this.ye_dimensions.width);
+                    }
+                }
+
+
+                //todo 设置精灵的大小（dimensions）
+
+
+//                var node = this._node;
+//                var locDimensionsWidth = node._dimensions.width, i, strLength;
+//                var locLineWidth = this._lineWidths;
+//                locLineWidth.length = 0;
+//
+//                this._isMultiLine = false;
+//                this.ye_measureConfig();
+//                if (locDimensionsWidth !== 0) {
+//                    // Content processing
+//                    this._strings = node._string.split('\n');
+//
+//                    for (i = 0; i < this._strings.length; i++) {
+//                        this._checkWarp(this._strings, i, locDimensionsWidth);
+//                    }
+//                } else {
+//                    this._strings = node._string.split('\n');
+//                    for (i = 0, strLength = this._strings.length; i < strLength; i++) {
+//                        locLineWidth.push(this.ye_measure(this._strings[i]));
+//                    }
+//                }
+//
+//                if (this._strings.length > 0)
+//                    this._isMultiLine = true;
+//
+//                var locSize, locStrokeShadowOffsetX = 0, locStrokeShadowOffsetY = 0;
+//                if (node._strokeEnabled)
+//                    locStrokeShadowOffsetX = locStrokeShadowOffsetY = node._strokeSize * 2;
+//                if (node._shadowEnabled) {
+//                    var locOffsetSize = node._shadowOffset;
+//                    locStrokeShadowOffsetX += Math.abs(locOffsetSize.x) * 2;
+//                    locStrokeShadowOffsetY += Math.abs(locOffsetSize.y) * 2;
+//                }
+//
+//                //get offset for stroke and shadow
+//                if (locDimensionsWidth === 0) {
+//                    if (this._isMultiLine)
+//                        locSize = cc.size(0 | (Math.max.apply(Math, locLineWidth) + locStrokeShadowOffsetX),
+//                            0 | ((this._fontClientHeight * this._strings.length) + locStrokeShadowOffsetY));
+//                    else
+//                        locSize = cc.size(0 | (this.ye_measure(node._string) + locStrokeShadowOffsetX), 0 | (this._fontClientHeight + locStrokeShadowOffsetY));
+//                } else {
+//                    if (node._dimensions.height === 0) {
+//                        if (this._isMultiLine)
+//                            locSize = cc.size(0 | (locDimensionsWidth + locStrokeShadowOffsetX), 0 | ((node.getLineHeight() * this._strings.length) + locStrokeShadowOffsetY));
+//                        else
+//                            locSize = cc.size(0 | (locDimensionsWidth + locStrokeShadowOffsetX), 0 | (node.getLineHeight() + locStrokeShadowOffsetY));
+//                    } else {
+//                        //dimension is already set, contentSize must be same as dimension
+//                        locSize = cc.size(0 | (locDimensionsWidth + locStrokeShadowOffsetX), 0 | (node._dimensions.height + locStrokeShadowOffsetY));
+//                    }
+//                }
+//                node.setContentSize(locSize);
+//                node._strokeShadowOffsetX = locStrokeShadowOffsetX;
+//                node._strokeShadowOffsetY = locStrokeShadowOffsetY;
+//
+//                // need computing _anchorPointInPoints
+//                var locAP = node._anchorPoint;
+//                this._anchorPointInPoints.x = (locStrokeShadowOffsetX * 0.5) + ((locSize.width - locStrokeShadowOffsetX) * locAP.x);
+//                this._anchorPointInPoints.y = (locStrokeShadowOffsetY * 0.5) + ((locSize.height - locStrokeShadowOffsetY) * locAP.y);
+            },
+            ye_measure: function(text){
+              return this.ye_context.measureText(text).width;
+            },
+            ye_formatMultiLine: function (strArr, i, maxWidth) {
+                var text =strArr[i];
+//                var text = lineStr;
+                var allWidth = this.ye_measure(text);
+
+                if (allWidth > maxWidth && text.length > 1) {
+                    //找到截断点
+                    var LOOP_MAX_NUM = 100;
+                    //increased while cycle maximum ceiling. default 100 time
+                    var loopIndex = 0;
+
+                    //尝试按maxWidth / width 比值，来截断字符串。
+                    //fuzzyLen为截取点序号
+                    var fuzzylen = text.length * ( maxWidth / allWidth ) | 0;
+                    var nextText = text.substr(fuzzylen);
+                    var width = allWidth - this.ye_measure(nextText);
+                    var pushNum = 0;
+
+
+                    //exceeded the size
+                    //处理完后，fuzzylen会小于等于截取点
+                    while (width > maxWidth && loopIndex < LOOP_MAX_NUM) {
+                        //尝试按maxWidth / width 比值，来截断字符串。
+                        //如果字符串仍然过长，则再次按maxWidth / width（< 1）来截取
+                        fuzzylen *= maxWidth / width;
+                        //| 0 取整？
+//                        fuzzylen = fuzzylen | 0;
+                        fuzzylen = YE.Tool.math.floor(fuzzylen);
+                        nextText = text.substr(fuzzylen);
+                        width = allWidth - this.ye_measure(nextText);
+                        loopIndex = loopIndex + 1;
+                    }
+
+                    loopIndex = 0;
+
+
+
+
+
+                    //find the truncation point
+                    //以单词为步长来判断（如果是中文，则步长为1）
+                    //处理后，fuzzylen为超过width的单词最后一个字符的序号，nextText
+
+                    while(width < maxWidth && loopIndex < LOOP_MAX_NUM){
+                        if(nextText){
+                            var exec = _wordRex.exec(nextText);
+                            pushNum = exec ? exec[0].length : 1;
+                        }
+                        fuzzylen = fuzzylen + pushNum;
+                        nextText = text.substr(fuzzylen);
+                        width = allWidth - this.ye_measure(nextText);
+                        loopIndex = loopIndex + 1;
+                    }
+
+                    var preText = text.substr(0, fuzzylen);
+
+//
+//
+//                    fuzzyLen -= pushNum;
+//                    if (fuzzyLen === 0) {
+//                        fuzzyLen = 1;
+//                        sLine = sLine.substr(1);
+//                    }
+//
+//                    var preText = text.substr(0, fuzzyLen), result;
+
+
+                   //todo 判断symbol有什么用？
+                    //如果wrapInspection为true，则行首字符不能为标点符号
+
+//                    //symbol in the first
+//                    if (cc.labelttf.wrapInspection) {
+//                        if (cc.labelttf._symbolrex.test(sline || tmptext)) {
+//                            result = cc.labelttf._lastwordrex.exec(stext);
+//                            fuzzylen -= result ? result[0].length : 0;
+//
+//                            sline = text.substr(fuzzylen);
+//                            stext = text.substr(0, fuzzylen);
+//                        }
+//                    }
+
+
+                    //不能截断一个单词
+
+                    //To judge whether a English words are truncated
+//                    var pExec = _lastEnglish.exec(preText);
+
+                    if(_firsrEnglish.test(nextText) ){
+                        var fExec = _firstEnglish.exec(nextText);
+//                        if (fExec && preText !== result[0]) {
+                        if(fExec){
+                            fuzzylen = fuzzylen - fExec[0].length;
+                            nextText = text.substr(fuzzylen);
+                            preText = text.substr(0, fuzzylen);
+                        }
+                    }
+                    else{
+                        fuzzylen = fuzzylen - pushNum;
+                        preText = text.substr(0, fuzzylen);
+                        if (fuzzylen === 0) {
+                            fuzzylen = 1;
+                            nextText = nextText.substr(1);
+                        }
+                        else{
+                            nextText = text.substr(fuzzylen);
+                        }
+                    }
+
+
+
+//                    strArr[i] = sLine || nextText;
+                    strArr[i] = nextText;
+                    strArr.splice(i, 0, preText);
+                }
+
+
+
+//                if (allWidth > maxWidth && text.length > 1) {
+//
+//                    var fuzzyLen = text.length * ( maxWidth / allWidth ) | 0;
+//                    var tmpText = text.substr(fuzzyLen);
+//                    var width = allWidth - this.ye_measure(tmpText);
+//                    var sLine;
+//                    var pushNum = 0;
+//
+//                    //Increased while cycle maximum ceiling. default 100 time
+//                    var checkWhile = 0;
+//
+//                    //Exceeded the size
+//                    while (width > maxWidth && checkWhile++ < 100) {
+//                        fuzzyLen *= maxWidth / width;
+//                        fuzzyLen = fuzzyLen | 0;
+//                        tmpText = text.substr(fuzzyLen);
+//                        width = allWidth - this.ye_measure(tmpText);
+//                    }
+//
+//                    checkWhile = -1;
+//
+//                    //Find the truncation point
+//                    while (width < maxWidth && checkWhile++ < 100) {
+//                        if (tmpText) {
+//                            var exec = cc.LabelTTF._wordRex.exec(tmpText);
+//                            pushNum = exec ? exec[0].length : 1;
+//                            sLine = tmpText;
+//                        }
+//
+//                        fuzzyLen = fuzzyLen + pushNum;
+//                        tmpText = text.substr(fuzzyLen);
+//                        width = allWidth - this.ye_measure(tmpText);
+//                    }
+//
+//                    fuzzyLen -= pushNum;
+//                    if (fuzzyLen === 0) {
+//                        fuzzyLen = 1;
+//                        sLine = sLine.substr(1);
+//                    }
+//
+//                    var preText = text.substr(0, fuzzyLen), result;
+//
+//                    //symbol in the first
+//                    if (cc.LabelTTF.wrapInspection) {
+//                        if (cc.LabelTTF._symbolRex.test(sLine || tmpText)) {
+//                            result = cc.LabelTTF._lastWordRex.exec(preText);
+//                            fuzzyLen -= result ? result[0].length : 0;
+//
+//                            sLine = text.substr(fuzzyLen);
+//                            preText = text.substr(0, fuzzyLen);
+//                        }
+//                    }
+//
+//                    //To judge whether a English words are truncated
+//                    if (cc.LabelTTF._firsrEnglish.test(sLine)) {
+//                        result = cc.LabelTTF._lastEnglish.exec(preText);
+//                        if (result && preText !== result[0]) {
+//                            fuzzyLen -= result[0].length;
+//                            sLine = text.substr(fuzzyLen);
+//                            preText = text.substr(0, fuzzyLen);
+//                        }
+//                    }
+//
+//                    strArr[i] = sLine || tmpText;
+//                    strArr.splice(i, 0, preText);
+//                }
             }
         },
         Public: {
@@ -64,8 +354,17 @@
                 else {
                     this.ye_fontName = this.ye_fontPath;
                 }
-            },
 
+                //默认为0
+                this.ye_dimensions.height = this.ye_dimensions.height || 0;
+            },
+            init: function (parent) {
+                this.base(parent);
+
+                this.ye_context = parent.getContext();
+
+                this.ye_formatText();
+            },
             setString: function (string) {
                 this.ye_string = string;
             },
@@ -101,12 +400,142 @@
                     context.strokeText(this.ye_string, this.ye_x, this.ye_y);
                 }
 
+                context.textBaseline = _textAlign[this.ye_yAlignment];
+                context.textAlign = _textBaseline[this.ye_xAlignment];
+
+
+
+                //如果多行
+                //依次显示出来，并设置水平和垂直对齐
+
+
+
+                //否则（单行）
+                //显示，设置水平和垂直对齐
+
+
+
+
+
+
+
+
+
                 context.restore();
             }
-        },
+
+
+
+/*
+            proto._drawTTFInCanvas = function (context) {
+            if (!context)
+                return;
+            var node = this._node;
+            var locStrokeShadowOffsetX = node._strokeShadowOffsetX, locStrokeShadowOffsetY = node._strokeShadowOffsetY;
+            var locContentSizeHeight = node._contentSize.height - locStrokeShadowOffsetY, locVAlignment = node._vAlignment,
+                locyAlignment = node._yAlignment, locStrokeSize = node._strokeSize;
+
+            context.setTransform(1, 0, 0, 1, 0 + locStrokeShadowOffsetX * 0.5, locContentSizeHeight + locStrokeShadowOffsetY * 0.5);
+
+            //this is fillText for canvas
+            if (context.font != this._fontStyleStr)
+                context.font = this._fontStyleStr;
+            context.fillStyle = this._fillColorStr;
+
+            var xOffset = 0, yOffset = 0;
+            //stroke style setup
+            var locStrokeEnabled = node._strokeEnabled;
+            if (locStrokeEnabled) {
+                context.lineWidth = locStrokeSize * 2;
+                context.strokeStyle = this._strokeColorStr;
+            }
+
+            //shadow style setup
+            if (node._shadowEnabled) {
+                var locShadowOffset = node._shadowOffset;
+                context.shadowColor = this._shadowColorStr;
+                context.shadowOffsetX = locShadowOffset.x;
+                context.shadowOffsetY = -locShadowOffset.y;
+                context.shadowBlur = node._shadowBlur;
+            }
+
+            context.textBaseline = cc.LabelTTF._textBaseline[locVAlignment];
+            context.textAlign = cc.LabelTTF._textAlign[locyAlignment];
+
+            var locContentWidth = node._contentSize.width - locStrokeShadowOffsetX;
+
+            //lineHeight
+            var lineHeight = node.getLineHeight();
+            var transformTop = (lineHeight - this._fontClientHeight) / 2;
+
+            if (locyAlignment === cc.TEXT_ALIGNMENT_RIGHT)
+                xOffset += locContentWidth;
+            else if (locyAlignment === cc.TEXT_ALIGNMENT_CENTER)
+                xOffset += locContentWidth / 2;
+            else
+                xOffset += 0;
+            if (this._isMultiLine) {
+                var locStrLen = this._strings.length;
+                if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM)
+                    yOffset = lineHeight - transformTop * 2 + locContentSizeHeight - lineHeight * locStrLen;
+                else if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER)
+                    yOffset = (lineHeight - transformTop * 2) / 2 + (locContentSizeHeight - lineHeight * locStrLen) / 2;
+
+                for (var i = 0; i < locStrLen; i++) {
+                    var line = this._strings[i];
+                    var tmpOffsetY = -locContentSizeHeight + (lineHeight * i + transformTop) + yOffset;
+                    if (locStrokeEnabled)
+                        context.strokeText(line, xOffset, tmpOffsetY);
+                    context.fillText(line, xOffset, tmpOffsetY);
+                }
+            } else {
+                if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM) {
+                    //do nothing
+                } else if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_TOP) {
+                    yOffset -= locContentSizeHeight;
+                } else {
+                    yOffset -= locContentSizeHeight * 0.5;
+                }
+                if (locStrokeEnabled)
+                    context.strokeText(node._string, xOffset, yOffset);
+                context.fillText(node._string, xOffset, yOffset);
+            }
+        };
+
+
+
+
+
+    cc.LabelTTF.__labelHeightDiv = cc.newElement("div");
+    cc.LabelTTF.__labelHeightDiv.style.fontFamily = "Arial";
+    cc.LabelTTF.__labelHeightDiv.style.position = "absolute";
+    cc.LabelTTF.__labelHeightDiv.style.left = "-100px";
+    cc.LabelTTF.__labelHeightDiv.style.top = "-100px";
+    cc.LabelTTF.__labelHeightDiv.style.lineHeight = "normal";
+
+    document.body ?
+        document.body.appendChild(cc.LabelTTF.__labelHeightDiv) :
+        cc._addEventListener(window, 'load', function () {
+            this.removeEventListener('load', arguments.callee, false);
+            document.body.appendChild(cc.LabelTTF.__labelHeightDiv);
+        }, false);
+
+    cc.LabelTTF.__getFontHeightByDiv = function (fontName, fontSize) {
+        var clientHeight = cc.LabelTTF.__fontHeightCache[fontName + "." + fontSize];
+        if (clientHeight > 0) return clientHeight;
+        var labelDiv = cc.LabelTTF.__labelHeightDiv;
+        labelDiv.innerHTML = "ajghl~!";
+        labelDiv.style.fontFamily = fontName;
+        labelDiv.style.fontSize = fontSize + "px";
+        clientHeight = labelDiv.clientHeight;
+        cc.LabelTTF.__fontHeightCache[fontName + "." + fontSize] = clientHeight;
+        labelDiv.innerHTML = "";
+*/
+
+    },
         Static: {
-            create: function (string, fontPath, fontSize) {
-                var text = new this(string, fontPath, fontSize);
+            create: function (string, fontPath, fontSize, dimensions, xAlignment, yAlignment) {
+                var text = new this(string, fontPath, fontSize, dimensions, xAlignment, yAlignment);
 
                 text.initWhenCreate();
 

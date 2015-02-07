@@ -67,7 +67,7 @@
                     }
                     //todo 待测试
                     //tag可为0
-                    if (tag !== undefined || tag !== null) {
+                    if (tag !== undefined && tag !== null) {
                         child.addTag(tag);
                     }
                     child.init(self);
@@ -83,7 +83,7 @@
                 }
                 //todo 待测试
                 //tag可为0
-                if (tag !== undefined || tag !== null) {
+                if (tag !== undefined && tag !== null) {
                     child.addTag(tag);
                 }
                 child.init(this);

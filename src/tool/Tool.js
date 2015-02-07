@@ -1021,6 +1021,14 @@
             }
         }());
 
+        Tool.math = (function(){
+           return {
+               floor: function(num){
+                   return num | 0;
+               }
+           }
+        }());
+
         YE.Tool = Tool;
     }());
 }());

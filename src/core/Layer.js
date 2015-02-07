@@ -65,26 +65,26 @@
                 var layerChilds = this.getChilds().filter(function (child) {
                     return child.isInstanceOf(YE.NodeContainer);
                 });
-                var spriteChilds = this.getChilds().filter(function (child) {
-                    return child.isInstanceOf(YE.Sprite);
+                var nodeChilds = this.getChilds().filter(function (child) {
+                    return child.isInstanceOf(YE.Node);
                 });
 
                 layerChilds.map("run", [this.getContext()]);
 
 
-                if(spriteChilds.length > 0){
-                    spriteChilds.map("update");
+                if(nodeChilds.length > 0){
+                    nodeChilds.map("update");
 
                     if (this.ye___isChange()) {
                         this.clear();
-                        spriteChilds.map("onBeforeDraw", [this.getContext()]);
+                        nodeChilds.map("onBeforeDraw", [this.getContext()]);
 
 
 //                    this.draw(this.getContext());
-                        spriteChilds.map("draw", [this.getContext()]);
+                        nodeChilds.map("draw", [this.getContext()]);
 
 
-                        spriteChilds.map("onAfterDraw", [this.getContext()]);
+                        nodeChilds.map("onAfterDraw", [this.getContext()]);
                         this.setStateNormal();
                     }
                 }
