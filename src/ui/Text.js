@@ -31,8 +31,8 @@
     var _wordRex = /([a-zA-Z0-9?????ü?éè?àùê????]+|\S)/;
     var _symbolRex = /^[!,.:;}\]%\?>、‘“》？。，！]/;
     var _lastWordRex = /([a-zA-Z0-9?????ü?éè?àùê????]+|\S)$/;
-    var _lastEnglish = /[a-zA-Z0-9?????ü?éè?àùê????]+$/;
-    var _firsrEnglish = /^[a-zA-Z0-9?????ü?éè?àùê????]/;
+    var _lastEnglishOrNum = /[a-zA-Z0-9?????ü?éè?àùê????]+$/;
+    var _firstEnglishOrNum = /^[a-zA-Z0-9?????ü?éè?àùê????]/;
 
 
 
@@ -74,6 +74,7 @@
                 return YE.Tool.path.basename(fontPath, YE.Tool.path.extname(fontPath));
             },
             ye_formatText: function () {
+                var i = 0;
                 if(this.ye_dimensions.width !== 0){
                     this.ye_strArr = this.ye_string.split('\n');
 //
@@ -239,29 +240,25 @@
                     //不能截断一个单词
 
                     //To judge whether a English words are truncated
-//                    var pExec = _lastEnglish.exec(preText);
+//                    var pExec = _lastEnglishOrNum.exec(preText);
 
-                    if(_firsrEnglish.test(nextText) ){
-                        var fExec = _firstEnglish.exec(nextText);
+                    if(_firstEnglishOrNum.test(nextText) ){
+                        var pExec = _lastEnglishOrNum.exec(preText);
 //                        if (fExec && preText !== result[0]) {
-                        if(fExec){
+                        if(pExec){
                             fuzzylen = fuzzylen - fExec[0].length;
-                            nextText = text.substr(fuzzylen);
-                            preText = text.substr(0, fuzzylen);
                         }
                     }
                     else{
                         fuzzylen = fuzzylen - pushNum;
-                        preText = text.substr(0, fuzzylen);
-                        if (fuzzylen === 0) {
-                            fuzzylen = 1;
-                            nextText = nextText.substr(1);
-                        }
-                        else{
-                            nextText = text.substr(fuzzylen);
-                        }
                     }
 
+                    if (fuzzylen === 0) {
+                        fuzzylen = 1;
+                    }
+
+                    nextText = text.substr(fuzzylen);
+                    preText = text.substr(0, fuzzylen);
 
 
 //                    strArr[i] = sLine || nextText;
@@ -325,8 +322,8 @@
 //                    }
 //
 //                    //To judge whether a English words are truncated
-//                    if (cc.LabelTTF._firsrEnglish.test(sLine)) {
-//                        result = cc.LabelTTF._lastEnglish.exec(preText);
+//                    if (cc.LabelTTF._firstEnglishOrNum.test(sLine)) {
+//                        result = cc.LabelTTF._lastEnglishOrNum.exec(preText);
 //                        if (result && preText !== result[0]) {
 //                            fuzzyLen -= result[0].length;
 //                            sLine = text.substr(fuzzyLen);
@@ -393,15 +390,18 @@
 
                 this._fillStyle = fillStyle;
             },
+            setLineHeight: function(lineHeight){
+                this.ye_lineHeight = lineHeight;
+            },
             ye_getDefaultLineHeight: function(){
-                return this.ye_computeLineHeight("normal");
+                return this.ye_lineHeight || this.ye_computeLineHeight("normal");
             },
             ye_getFontClientHeight: function(){
                 var fontSize = this.ye_fontSize,
                     fontName = this.ye_fontFamily;
                 var key = fontSize+"." + fontName;
                 var cacheHeight = this.ye_fontClientHeightCache.getValue(key);
-var height = null;
+                var height = null;
 
                 if(cacheHeight){
                     return cacheHeight;
@@ -416,8 +416,8 @@ var height = null;
                 var div = YE.$.newElement("div");
 
                 div.style.cssText = "font-family: " + this.ye_fontFamily
-                + "; font-size: " + this.ye_fontSize + "px"
-                + "; position: absolute; left: -100px; top: -100px; line-height: " + lineHeight + ";";
+                    + "; font-size: " + this.ye_fontSize + "px"
+                    + "; position: absolute; left: -100px; top: -100px; line-height: " + lineHeight + ";";
 
 
 
@@ -491,7 +491,7 @@ var height = null;
                 var fontClientHeight = this.ye_getFontClientHeight();
                 var self = this;
                 var y = this.ye_y;
-var x = this.ye_x;
+                var x = this.ye_x;
 
 //                context.fillStyle = self._fillStyle;
 //                context.fillText("阿斯顿", x, 0);
