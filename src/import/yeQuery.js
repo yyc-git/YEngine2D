@@ -25,7 +25,13 @@
         }
 
         function YEQuery(domStr) {
-            this.ye_doms = document.querySelectorAll(domStr);
+            //todo 待测试
+            if(YE.Tool.judge.isDom(arguments[0])){
+                this.ye_doms = [arguments[0]];
+            }
+            else{
+                this.ye_doms = document.querySelectorAll(domStr);
+            }
 
             if (!(this instanceof YEQuery)) {
                 return new YEQuery(domStr);
@@ -167,6 +173,25 @@
                 }
 
                 return this;
+            },
+            //todo 待测试
+            remove: function(){
+//                var d = null;
+//
+//                if(YE.Tool.judge.browser.isIE()){
+//                    if(node && node.tagName != 'BODY'){
+//                        d = d || document.createElement('DIV');
+//                        d.appendChild(node);
+//                        d.innerHTML = '';
+//                    }
+//                }
+//                else{
+                this.ye_doms.forEach(function(dom){
+                    if(dom && dom.parentNode && dom.tagName !=  'BODY'){
+                        dom.parentNode.removeChild(dom);
+                    }
+                });
+//                }
             }
         }
 

@@ -55,7 +55,7 @@
             ye_string: null,
             ye_strArr: null,
             ye_fontPath: null,
-            ye_fontName: null,
+            ye_fontFamily: null,
             ye_fontSize: null,
             ye_dimensions: null,
             ye_xAlignment: null,
@@ -67,6 +67,8 @@
             ye_strokeStyle: null,
             ye_strokeSize: null,
             ye_context: null,
+            ye_lineHeight: null,
+            ye_lineHeightCache: null,
 
             ye_getFontName: function (fontPath) {
                 return YE.Tool.path.basename(fontPath, YE.Tool.path.extname(fontPath));
@@ -77,7 +79,7 @@
 //
                     for (i = 0; i < this.ye_strArr.length; i++) {
 //                        this._checkWarp(this._strings, i, locDimensionsWidth);
-                         this.ye_formatMultiLine(this.ye_strArr, i, this.ye_dimensions.width);
+                        this.ye_formatMultiLine(this.ye_strArr, i, this.ye_dimensions.width);
                     }
                 }
 
@@ -146,7 +148,7 @@
 //                this._anchorPointInPoints.y = (locStrokeShadowOffsetY * 0.5) + ((locSize.height - locStrokeShadowOffsetY) * locAP.y);
             },
             ye_measure: function(text){
-              return this.ye_context.measureText(text).width;
+                return this.ye_context.measureText(text).width;
             },
             ye_formatMultiLine: function (strArr, i, maxWidth) {
                 var text =strArr[i];
@@ -215,7 +217,7 @@
 //                    var preText = text.substr(0, fuzzyLen), result;
 
 
-                   //todo 判断symbol有什么用？
+                    //todo 判断symbol有什么用？
                     //如果wrapInspection为true，则行首字符不能为标点符号
 
 //                    //symbol in the first
@@ -349,10 +351,10 @@
                 if (YE.Tool.path.isPath(this.ye_fontPath)) {
 //                    等待加载完成后再渲染（加入到preLoad中？）
 //                    YE.FontLoader.getInstance().load(this.ye_fontPath);
-                    this.ye_fontName = this.ye_getFontName(this.ye_fontPath);
+                    this.ye_fontFamily = this.ye_getFontName(this.ye_fontPath);
                 }
                 else {
-                    this.ye_fontName = this.ye_fontPath;
+                    this.ye_fontFamily = this.ye_fontPath;
                 }
 
                 //默认为0
@@ -361,9 +363,11 @@
             init: function (parent) {
                 this.base(parent);
 
+                this.ye_lineHeightCache = YE.Hash.create();
                 this.ye_context = parent.getContext();
 
                 this.ye_formatText();
+                this.ye_setLineHeight();
             },
             setString: function (string) {
                 this.ye_string = string;
@@ -385,20 +389,79 @@
 
                 this._fillStyle = fillStyle;
             },
+            ye_setLineHeight: function(){
+                var fontSize = this.ye_fontSize,
+                    fontName = this.ye_fontFamily;
+                var key = fontSize+"." + fontName;
+                var cacheHeight = this.ye_lineHeightCache.getValue(key);
+
+                if(cacheHeight){
+                    this.ye_lineHeight = cacheHeight;
+
+                    return;
+                }
+
+                this.ye_lineHeight = this.ye_getLineHeightDiv();
+                this.ye_lineHeightCache.addChild(key, this.ye_lineHeight);
+            },
+            ye_getLineHeightDiv: function(){
+                var div = YE.$.newElement("div"),
+                    lineHeight = 0;
+
+                div.style.cssText = "font-family: " + this.ye_fontFamily
+                + "; font-size: " + this.ye_fontSize + "px"
+                + "; position: absolute; left: -100px; top: -100px; line-height: normal;";
+
+
+
+//                div.css({
+//                    fontFamily: this.ye_fontFamily,
+//                    fontSize: this.ye_fontSize,
+//                    position: "absolute",
+//                    left: "-100px",
+//                    top: "-100px",
+//                    lineHeight: "normal"
+//                });
+
+//                div.appendTo($("body"));
+                YE.$("body").prepend(div);
+                div.innerHTML = "abc!";
+                lineHeight = div.clientHeight;
+
+                YE.$(div).remove();
+
+                return lineHeight;
+
+//                cc.LabelTTF.__labelHeightDiv = cc.newElement("div");
+//                cc.LabelTTF.__labelHeightDiv.style.fontFamily = "Arial";
+//                cc.LabelTTF.__labelHeightDiv.style.position = "absolute";
+//                cc.LabelTTF.__labelHeightDiv.style.left = "-100px";
+//                cc.LabelTTF.__labelHeightDiv.style.top = "-100px";
+//                cc.LabelTTF.__labelHeightDiv.style.lineHeight = "normal";
+//
+//                document.body ?
+//                    document.body.appendChild(cc.LabelTTF.__labelHeightDiv) :
+//                    cc._addEventListener(window, 'load', function () {
+//                        this.removeEventListener('load', arguments.callee, false);
+//                        document.body.appendChild(cc.LabelTTF.__labelHeightDiv);
+//                    }, false);
+//
+//                cc.LabelTTF.__getFontHeightByDiv = function (fontName, fontSize) {
+//                    var clientHeight = cc.LabelTTF.__fontHeightCache[fontName + "." + fontSize];
+//                    if (clientHeight > 0) return clientHeight;
+//                    var labelDiv = cc.LabelTTF.__labelHeightDiv;
+//                    labelDiv.innerHTML = "ajghl~!";
+//                    labelDiv.style.fontFamily = fontName;
+//                    labelDiv.style.fontSize = fontSize + "px";
+//                    clientHeight = labelDiv.clientHeight;
+//                    cc.LabelTTF.__fontHeightCache[fontName + "." + fontSize] = clientHeight;
+            },
             draw: function (context) {
+                //todo 待优化：如果文字没有变化，则不重绘
+
                 context.save();
 
-                context.font = this.ye_fontSize + "px '" + this.ye_fontName + "'";
-
-                if (this.ye_fillEnabled) {
-                    context.fillStyle = this._fillStyle;
-                    context.fillText(this.ye_string, this.ye_x, this.ye_y);
-                }
-                else if (this.ye_strokeEnabled) {
-                    context.strokeStyle = this.ye_strokeStyle;
-                    context.lineWidth = this.ye_strokeSize;
-                    context.strokeText(this.ye_string, this.ye_x, this.ye_y);
-                }
+                context.font = this.ye_fontSize + "px '" + this.ye_fontFamily + "'";
 
                 context.textBaseline = _textAlign[this.ye_yAlignment];
                 context.textAlign = _textBaseline[this.ye_xAlignment];
@@ -412,8 +475,64 @@
 
                 //否则（单行）
                 //显示，设置水平和垂直对齐
+                var lineHeight = this.ye_lineHeight;
+                var self = this;
+                var y = this.ye_y;
 
+                if(this.ye_strArr.length > 1){
+                    this.ye_strArr.forEach(function(str){
+                        if (self.ye_fillEnabled) {
+                            context.fillStyle = self._fillStyle;
+                            context.fillText(str, self.ye_x, y);
+                        }
+                        else if (self.ye_strokeEnabled) {
+                            context.strokeStyle = self.ye_strokeStyle;
+                            context.lineWidth = self.ye_strokeSize;
+                            context.strokeText(str, self.ye_x, y);
+                        }
+                        y = y + lineHeight;
+                    });
+                }
 
+//                var lineHeight = node.getLineHeight();
+//                var transformTop = (lineHeight - this._fontClientHeight) / 2;
+//
+//                if (locyAlignment === cc.TEXT_ALIGNMENT_RIGHT)
+//                    xOffset += locContentWidth;
+//                else if (locyAlignment === cc.TEXT_ALIGNMENT_CENTER)
+//                    xOffset += locContentWidth / 2;
+//                else
+//                    xOffset += 0;
+//                if (this._isMultiLine) {
+//                    var locStrLen = this._strings.length;
+//                    if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM)
+//                        yOffset = lineHeight - transformTop * 2 + locContentSizeHeight - lineHeight * locStrLen;
+//                    else if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER)
+//                        yOffset = (lineHeight - transformTop * 2) / 2 + (locContentSizeHeight - lineHeight * locStrLen) / 2;
+//
+//                    for (var i = 0; i < locStrLen; i++) {
+//                        var line = this._strings[i];
+//                        var tmpOffsetY = -locContentSizeHeight + (lineHeight * i + transformTop) + yOffset;
+//                        if (locStrokeEnabled)
+//                            context.strokeText(line, xOffset, tmpOffsetY);
+//                        context.fillText(line, xOffset, tmpOffsetY);
+//                    }
+//                } else {
+//                    if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM) {
+//                        //do nothing
+//                    } else if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_TOP) {
+//                        yOffset -= locContentSizeHeight;
+//                    } else {
+//                        yOffset -= locContentSizeHeight * 0.5;
+//                    }
+//                    if (locStrokeEnabled)
+//                        context.strokeText(node._string, xOffset, yOffset);
+//                    context.fillText(node._string, xOffset, yOffset);
+//                }
+//            };
+//
+//
+//
 
 
 
@@ -426,113 +545,114 @@
 
 
 
-/*
-            proto._drawTTFInCanvas = function (context) {
-            if (!context)
-                return;
-            var node = this._node;
-            var locStrokeShadowOffsetX = node._strokeShadowOffsetX, locStrokeShadowOffsetY = node._strokeShadowOffsetY;
-            var locContentSizeHeight = node._contentSize.height - locStrokeShadowOffsetY, locVAlignment = node._vAlignment,
-                locyAlignment = node._yAlignment, locStrokeSize = node._strokeSize;
+            /*
+             proto._drawTTFInCanvas = function (context) {
+             if (!context)
+             return;
+             var node = this._node;
+             var locStrokeShadowOffsetX = node._strokeShadowOffsetX, locStrokeShadowOffsetY = node._strokeShadowOffsetY;
+             var locContentSizeHeight = node._contentSize.height - locStrokeShadowOffsetY, locVAlignment = node._vAlignment,
+             locyAlignment = node._yAlignment, locStrokeSize = node._strokeSize;
 
-            context.setTransform(1, 0, 0, 1, 0 + locStrokeShadowOffsetX * 0.5, locContentSizeHeight + locStrokeShadowOffsetY * 0.5);
+             context.setTransform(1, 0, 0, 1, 0 + locStrokeShadowOffsetX * 0.5, locContentSizeHeight + locStrokeShadowOffsetY * 0.5);
 
-            //this is fillText for canvas
-            if (context.font != this._fontStyleStr)
-                context.font = this._fontStyleStr;
-            context.fillStyle = this._fillColorStr;
+             //this is fillText for canvas
+             if (context.font != this._fontStyleStr)
+             context.font = this._fontStyleStr;
+             context.fillStyle = this._fillColorStr;
 
-            var xOffset = 0, yOffset = 0;
-            //stroke style setup
-            var locStrokeEnabled = node._strokeEnabled;
-            if (locStrokeEnabled) {
-                context.lineWidth = locStrokeSize * 2;
-                context.strokeStyle = this._strokeColorStr;
-            }
+             var xOffset = 0, yOffset = 0;
+             //stroke style setup
+             var locStrokeEnabled = node._strokeEnabled;
+             if (locStrokeEnabled) {
+             context.lineWidth = locStrokeSize * 2;
+             context.strokeStyle = this._strokeColorStr;
+             }
 
-            //shadow style setup
-            if (node._shadowEnabled) {
-                var locShadowOffset = node._shadowOffset;
-                context.shadowColor = this._shadowColorStr;
-                context.shadowOffsetX = locShadowOffset.x;
-                context.shadowOffsetY = -locShadowOffset.y;
-                context.shadowBlur = node._shadowBlur;
-            }
+             //shadow style setup
+             if (node._shadowEnabled) {
+             var locShadowOffset = node._shadowOffset;
+             context.shadowColor = this._shadowColorStr;
+             context.shadowOffsetX = locShadowOffset.x;
+             context.shadowOffsetY = -locShadowOffset.y;
+             context.shadowBlur = node._shadowBlur;
+             }
 
-            context.textBaseline = cc.LabelTTF._textBaseline[locVAlignment];
-            context.textAlign = cc.LabelTTF._textAlign[locyAlignment];
+             context.textBaseline = cc.LabelTTF._textBaseline[locVAlignment];
+             context.textAlign = cc.LabelTTF._textAlign[locyAlignment];
 
-            var locContentWidth = node._contentSize.width - locStrokeShadowOffsetX;
+             var locContentWidth = node._contentSize.width - locStrokeShadowOffsetX;
 
-            //lineHeight
-            var lineHeight = node.getLineHeight();
-            var transformTop = (lineHeight - this._fontClientHeight) / 2;
+             //lineHeight
+             var lineHeight = node.getLineHeight();
+             var transformTop = (lineHeight - this._fontClientHeight) / 2;
 
-            if (locyAlignment === cc.TEXT_ALIGNMENT_RIGHT)
-                xOffset += locContentWidth;
-            else if (locyAlignment === cc.TEXT_ALIGNMENT_CENTER)
-                xOffset += locContentWidth / 2;
-            else
-                xOffset += 0;
-            if (this._isMultiLine) {
-                var locStrLen = this._strings.length;
-                if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM)
-                    yOffset = lineHeight - transformTop * 2 + locContentSizeHeight - lineHeight * locStrLen;
-                else if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER)
-                    yOffset = (lineHeight - transformTop * 2) / 2 + (locContentSizeHeight - lineHeight * locStrLen) / 2;
+             if (locyAlignment === cc.TEXT_ALIGNMENT_RIGHT)
+             xOffset += locContentWidth;
+             else if (locyAlignment === cc.TEXT_ALIGNMENT_CENTER)
+             xOffset += locContentWidth / 2;
+             else
+             xOffset += 0;
+             if (this._isMultiLine) {
+             var locStrLen = this._strings.length;
+             if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM)
+             yOffset = lineHeight - transformTop * 2 + locContentSizeHeight - lineHeight * locStrLen;
+             else if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER)
+             yOffset = (lineHeight - transformTop * 2) / 2 + (locContentSizeHeight - lineHeight * locStrLen) / 2;
 
-                for (var i = 0; i < locStrLen; i++) {
-                    var line = this._strings[i];
-                    var tmpOffsetY = -locContentSizeHeight + (lineHeight * i + transformTop) + yOffset;
-                    if (locStrokeEnabled)
-                        context.strokeText(line, xOffset, tmpOffsetY);
-                    context.fillText(line, xOffset, tmpOffsetY);
-                }
-            } else {
-                if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM) {
-                    //do nothing
-                } else if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_TOP) {
-                    yOffset -= locContentSizeHeight;
-                } else {
-                    yOffset -= locContentSizeHeight * 0.5;
-                }
-                if (locStrokeEnabled)
-                    context.strokeText(node._string, xOffset, yOffset);
-                context.fillText(node._string, xOffset, yOffset);
-            }
-        };
-
-
+             for (var i = 0; i < locStrLen; i++) {
+             var line = this._strings[i];
+             var tmpOffsetY = -locContentSizeHeight + (lineHeight * i + transformTop) + yOffset;
+             if (locStrokeEnabled)
+             context.strokeText(line, xOffset, tmpOffsetY);
+             context.fillText(line, xOffset, tmpOffsetY);
+             }
+             } else {
+             if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM) {
+             //do nothing
+             } else if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_TOP) {
+             yOffset -= locContentSizeHeight;
+             } else {
+             yOffset -= locContentSizeHeight * 0.5;
+             }
+             if (locStrokeEnabled)
+             context.strokeText(node._string, xOffset, yOffset);
+             context.fillText(node._string, xOffset, yOffset);
+             }
+             };
 
 
 
-    cc.LabelTTF.__labelHeightDiv = cc.newElement("div");
-    cc.LabelTTF.__labelHeightDiv.style.fontFamily = "Arial";
-    cc.LabelTTF.__labelHeightDiv.style.position = "absolute";
-    cc.LabelTTF.__labelHeightDiv.style.left = "-100px";
-    cc.LabelTTF.__labelHeightDiv.style.top = "-100px";
-    cc.LabelTTF.__labelHeightDiv.style.lineHeight = "normal";
 
-    document.body ?
-        document.body.appendChild(cc.LabelTTF.__labelHeightDiv) :
-        cc._addEventListener(window, 'load', function () {
-            this.removeEventListener('load', arguments.callee, false);
-            document.body.appendChild(cc.LabelTTF.__labelHeightDiv);
-        }, false);
 
-    cc.LabelTTF.__getFontHeightByDiv = function (fontName, fontSize) {
-        var clientHeight = cc.LabelTTF.__fontHeightCache[fontName + "." + fontSize];
-        if (clientHeight > 0) return clientHeight;
-        var labelDiv = cc.LabelTTF.__labelHeightDiv;
-        labelDiv.innerHTML = "ajghl~!";
-        labelDiv.style.fontFamily = fontName;
-        labelDiv.style.fontSize = fontSize + "px";
-        clientHeight = labelDiv.clientHeight;
-        cc.LabelTTF.__fontHeightCache[fontName + "." + fontSize] = clientHeight;
-        labelDiv.innerHTML = "";
-*/
 
-    },
+             cc.LabelTTF.__labelHeightDiv = cc.newElement("div");
+             cc.LabelTTF.__labelHeightDiv.style.fontFamily = "Arial";
+             cc.LabelTTF.__labelHeightDiv.style.position = "absolute";
+             cc.LabelTTF.__labelHeightDiv.style.left = "-100px";
+             cc.LabelTTF.__labelHeightDiv.style.top = "-100px";
+             cc.LabelTTF.__labelHeightDiv.style.lineHeight = "normal";
+
+             document.body ?
+             document.body.appendChild(cc.LabelTTF.__labelHeightDiv) :
+             cc._addEventListener(window, 'load', function () {
+             this.removeEventListener('load', arguments.callee, false);
+             document.body.appendChild(cc.LabelTTF.__labelHeightDiv);
+             }, false);
+
+             cc.LabelTTF.__getFontHeightByDiv = function (fontName, fontSize) {
+             var clientHeight = cc.LabelTTF.__fontHeightCache[fontName + "." + fontSize];
+             if (clientHeight > 0) return clientHeight;
+             var labelDiv = cc.LabelTTF.__labelHeightDiv;
+             labelDiv.innerHTML = "ajghl~!";
+             labelDiv.style.fontFamily = fontName;
+             labelDiv.style.fontSize = fontSize + "px";
+             clientHeight = labelDiv.clientHeight;
+             cc.LabelTTF.__fontHeightCache[fontName + "." + fontSize] = clientHeight;
+             labelDiv.innerHTML = "";
+             */
+
+        },
         Static: {
             create: function (string, fontPath, fontSize, dimensions, xAlignment, yAlignment) {
                 var text = new this(string, fontPath, fontSize, dimensions, xAlignment, yAlignment);
