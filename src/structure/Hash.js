@@ -19,6 +19,7 @@
             getChilds: function () {
                 return this.ye_childs;
             },
+            //todo 重命名为getChildByKey
             getValue: function (key) {
                 return this.ye_childs[key];
             },

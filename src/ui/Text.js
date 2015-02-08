@@ -28,11 +28,11 @@
 //Other as Oriental Language
     //todo 暂时仅支持English，删除French、German的支持
 
-    var _wordRex = /([a-zA-Z0-9ÄÖÜäöüßéèçàùêâîôû]+|\S)/;
+    var _wordRex = /([a-zA-Z0-9?????ü?éè?àùê????]+|\S)/;
     var _symbolRex = /^[!,.:;}\]%\?>、‘“》？。，！]/;
-    var _lastWordRex = /([a-zA-Z0-9ÄÖÜäöüßéèçàùêâîôû]+|\S)$/;
-    var _lastEnglish = /[a-zA-Z0-9ÄÖÜäöüßéèçàùêâîôû]+$/;
-    var _firsrEnglish = /^[a-zA-Z0-9ÄÖÜäöüßéèçàùêâîôû]/;
+    var _lastWordRex = /([a-zA-Z0-9?????ü?éè?àùê????]+|\S)$/;
+    var _lastEnglish = /[a-zA-Z0-9?????ü?éè?àùê????]+$/;
+    var _firsrEnglish = /^[a-zA-Z0-9?????ü?éè?àùê????]/;
 
 
 
@@ -68,7 +68,7 @@
             ye_strokeSize: null,
             ye_context: null,
             ye_lineHeight: null,
-            ye_lineHeightCache: null,
+            ye_fontClientHeightCache: null,
 
             ye_getFontName: function (fontPath) {
                 return YE.Tool.path.basename(fontPath, YE.Tool.path.extname(fontPath));
@@ -148,7 +148,11 @@
 //                this._anchorPointInPoints.y = (locStrokeShadowOffsetY * 0.5) + ((locSize.height - locStrokeShadowOffsetY) * locAP.y);
             },
             ye_measure: function(text){
-                return this.ye_context.measureText(text).width;
+                var context = this.ye_context;
+
+                context.font = this.ye_fontSize + "px '" + this.ye_fontFamily + "'";
+
+                return context.measureText(text).width;
             },
             ye_formatMultiLine: function (strArr, i, maxWidth) {
                 var text =strArr[i];
@@ -363,11 +367,11 @@
             init: function (parent) {
                 this.base(parent);
 
-                this.ye_lineHeightCache = YE.Hash.create();
+                this.ye_fontClientHeightCache = YE.Hash.create();
                 this.ye_context = parent.getContext();
 
                 this.ye_formatText();
-                this.ye_setLineHeight();
+                this.ye_lineHeight = this.ye_getDefaultLineHeight();
             },
             setString: function (string) {
                 this.ye_string = string;
@@ -389,28 +393,31 @@
 
                 this._fillStyle = fillStyle;
             },
-            ye_setLineHeight: function(){
+            ye_getDefaultLineHeight: function(){
+                return this.ye_computeLineHeight("normal");
+            },
+            ye_getFontClientHeight: function(){
                 var fontSize = this.ye_fontSize,
                     fontName = this.ye_fontFamily;
                 var key = fontSize+"." + fontName;
-                var cacheHeight = this.ye_lineHeightCache.getValue(key);
+                var cacheHeight = this.ye_fontClientHeightCache.getValue(key);
+var height = null;
 
                 if(cacheHeight){
-                    this.ye_lineHeight = cacheHeight;
-
-                    return;
+                    return cacheHeight;
                 }
 
-                this.ye_lineHeight = this.ye_getLineHeightDiv();
-                this.ye_lineHeightCache.addChild(key, this.ye_lineHeight);
+                height = this.ye_computeLineHeight(1);
+                this.ye_fontClientHeightCache.addChild(key, height);
+
+                return height;
             },
-            ye_getLineHeightDiv: function(){
-                var div = YE.$.newElement("div"),
-                    lineHeight = 0;
+            ye_computeLineHeight: function(lineHeight){
+                var div = YE.$.newElement("div");
 
                 div.style.cssText = "font-family: " + this.ye_fontFamily
                 + "; font-size: " + this.ye_fontSize + "px"
-                + "; position: absolute; left: -100px; top: -100px; line-height: normal;";
+                + "; position: absolute; left: -100px; top: -100px; line-height: " + lineHeight + ";";
 
 
 
@@ -461,11 +468,16 @@
 
                 context.save();
 
+                //todo 测试测试代码
+                context.strokeStyle = "green";
+                context.strokeRect(400, 100, 400, 300);
+
                 context.font = this.ye_fontSize + "px '" + this.ye_fontFamily + "'";
 
-                context.textBaseline = _textAlign[this.ye_yAlignment];
-                context.textAlign = _textBaseline[this.ye_xAlignment];
-
+//                context.textBaseline = _textAlign[this.ye_yAlignment];
+//                context.textAlign = _textBaseline[this.ye_xAlignment];
+                context.textBaseline = "top";
+                context.textAlign = "start";
 
 
                 //如果多行
@@ -476,20 +488,63 @@
                 //否则（单行）
                 //显示，设置水平和垂直对齐
                 var lineHeight = this.ye_lineHeight;
+                var fontClientHeight = this.ye_getFontClientHeight();
                 var self = this;
                 var y = this.ye_y;
+var x = this.ye_x;
 
+//                context.fillStyle = self._fillStyle;
+//                context.fillText("阿斯顿", x, 0);
+
+
+
+//                if (locyAlignment === cc.TEXT_ALIGNMENT_RIGHT)
+//                    xOffset += locContentWidth;
+//                else if (locyAlignment === cc.TEXT_ALIGNMENT_CENTER)
+//                    xOffset += locContentWidth / 2;
+//                else
+//                    xOffset += 0;
+//                if (this._isMultiLine) {
+//                    var locStrLen = this._strings.length;
+//                    if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM)
+//                        yOffset = lineHeight - transformTop * 2 + locContentSizeHeight - lineHeight * locStrLen;
+//                    else if (locVAlignment === cc.VERTICAL_TEXT_ALIGNMENT_CENTER)
+//                        yOffset = (lineHeight - transformTop * 2) / 2 + (locContentSizeHeight - lineHeight * locStrLen) / 2;
+
+                //多行
                 if(this.ye_strArr.length > 1){
-                    this.ye_strArr.forEach(function(str){
+                    var lineCount = this.ye_strArr.length;
+                    //最后一行的行高为字体本身的高度
+                    var lineTotalHeight = (lineCount - 1) * lineHeight + fontClientHeight;
+
+                    if(self.ye_yAlignment === YE.TEXT_YALIGNMENT.BOTTOM){
+                        y = y + self.ye_dimensions.height - lineTotalHeight;
+                    }
+                    else if(self.ye_yAlignment === YE.TEXT_YALIGNMENT.MIDDLE){
+                        y = y + (self.ye_dimensions.height - lineTotalHeight) / 2;
+                    }
+
+                    this.ye_strArr.forEach(function(str, index){
+                        if(self.ye_xAlignment === YE.TEXT_XALIGNMENT.RIGHT){
+                            x = x + self.ye_dimensions.width - self.ye_measure(str);
+                        }
+                        else if(self.ye_xAlignment == YE.TEXT_XALIGNMENT.CENTER){
+                            x = x + (self.ye_dimensions.width - self.ye_measure(str)) / 2;
+                        }
+
+
+
                         if (self.ye_fillEnabled) {
                             context.fillStyle = self._fillStyle;
-                            context.fillText(str, self.ye_x, y);
+                            context.fillText(str, x, y);
                         }
                         else if (self.ye_strokeEnabled) {
                             context.strokeStyle = self.ye_strokeStyle;
                             context.lineWidth = self.ye_strokeSize;
-                            context.strokeText(str, self.ye_x, y);
+                            context.strokeText(str, x, y);
                         }
+
+                        x = self.ye_x;
                         y = y + lineHeight;
                     });
                 }
