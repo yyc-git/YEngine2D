@@ -153,7 +153,7 @@
 
 
 //                        var kerningAmount = locKerningDict[(prev << 16) | (key & 0xffff)] || 0;
-                    var fontDef = locFontDict[key];
+                    var fontDef = this.ye_getFontDef(locFontDict, key);
                     if (!fontDef) {
                         YE.log("cocos2d: LabelBMFont: character not found " + locStr[i]);
                         continue;
@@ -220,6 +220,9 @@
 
                 }
             },
+            ye_getFontDef: function(fontDict, key){
+                return fontDict[key];
+            },
             ye_formatText: function (fntObj) {
                 //处理多行、空格、超出宽度（需要换行）
 
@@ -248,8 +251,9 @@
 
                     //todo 改为iterate
 
+                    //第一个字符直接显示，从第二个字符开始判断
                     //这里遍历string而不是遍历childs，是为了获得正确的序号index，从而能获得对应字符的精灵
-                    for (var i = 0, lj = self.ye_string.length; i < lj; i++) {
+                    for (var i = 1, lj = self.ye_string.length; i < lj; i++) {
                         characterSprite = this.getChildByTag(i);
 
 //                        //不是每个字符都有精灵（如空格字符就没有精灵）
@@ -645,26 +649,28 @@
             initWhenCreate: function (id) {
                 //todo 暂不支持kerning
 
-                if (id) {
+                if(!id){
+                    return false;
+                }
 //                    var newConf = cc.loader.getRes(fntFile);
-                    var newConf = YE.fntLoader.getRes(id + "_fnt");
-                    if (!newConf) {
-                        YE.log("cc.LabelBMFont.initWithString(): Impossible to create font. Please check file");
-                        return false;
-                    }
+                var newConf = YE.fntLoader.getRes(id + "_fnt");
+                if (!newConf) {
+                    YE.log("cc.LabelBMFont.initWithString(): Impossible to create font. Please check file");
+                    return false;
+                }
 
 //                    var img = YE.ImgLoader.get(newConf.atlasName)
 
-                    var img = YE.ImgLoader.getInstance().get(id + "_image");
+                var img = YE.ImgLoader.getInstance().get(id + "_image");
 
 
-                    this.ye_createAndAddFontCharSprites(newConf, img);
+                this.ye_createAndAddFontCharSprites(newConf, img);
 
 
-                    this.ye_formatText(newConf);
+                this.ye_formatText(newConf);
 
 
-                    //todo 设置偏移量等
+                //todo 设置偏移量等
 
 
 //                    self._config = newConf;
@@ -684,7 +690,6 @@
 //                    }
 
 
-                }
 //                else {
 //                    texture = new cc.Texture2D();
 //                    var image = new Image();

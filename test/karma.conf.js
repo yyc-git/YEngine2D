@@ -33,7 +33,12 @@ module.exports = function(config) {
 
         'src/**',
 
+        //chrome的控制台中，不会显示全部的单元测试用例（如不会显示TextSpec的测试用例），
+        //且单元测试的总计数也可能有问题。
+        //如果测试失败，会显示错误error（但不会显示Failed的log信息）
         'test/unit/**'
+        //这样配置，就能显示全部的单元测试用例（如TextSpec、TextImgSpec），且会显示Failed的log信息
+        //'test/unit/ui/*.js'
     ],
 
 
@@ -73,8 +78,8 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'IE'],
-
+    //browsers: ['Chrome', 'IE'],
+      browsers: ['Chrome'],
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits

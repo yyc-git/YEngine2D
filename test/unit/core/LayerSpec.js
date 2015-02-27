@@ -140,85 +140,85 @@ describe("Layer.js", function () {
         });
     });
 
-    describe("ye_P_run", function () {
-        function setStateNormal() {
-            layer.setStateNormal();
-        }
-
-        function setStateChange() {
-            layer.setStateChange();
-        }
-
-        beforeEach(function () {
-            setStateNormal();
-
-            sandbox.stub(layer, "iterate");
-        });
-
-//        it("执行精灵的onbeforeRun方法", function () {
+//    describe("ye_P_run", function () {
+//        function setStateNormal() {
+//            layer.setStateNormal();
+//        }
+//
+//        function setStateChange() {
+//            layer.setStateChange();
+//        }
+//
+//        beforeEach(function () {
+//            setStateNormal();
+//
+//            sandbox.stub(layer, "iterate");
+//        });
+//
+////        it("执行精灵的onbeforeRun方法", function () {
+////            layer.ye_P_run();
+////
+////            expect(layer.iterate).toCalledWith("onbeforeRun");
+////        });
+//        it("执行精灵类所有动作", function () {
 //            layer.ye_P_run();
 //
-//            expect(layer.iterate).toCalledWith("onbeforeRun");
+//            expect(layer.iterate).toCalledWith("update");
 //        });
-        it("执行精灵类所有动作", function () {
-            layer.ye_P_run();
-
-            expect(layer.iterate).toCalledWith("update");
-        });
-
-        describe("如果_state为change", function () {
-            beforeEach(function () {
-                setStateChange();
-                sandbox.stub(layer, "clear");
-                sandbox.stub(layer, "change");
-            });
-
-            it("调用clear", function () {
-                layer.ye_P_run();
-
-                expect(layer.clear).toCalledOnce();
-            });
-            it("调用精灵类的onbeforeDraw方法", function () {
-                layer.ye_P_run();
-
-                expect(layer.iterate.secondCall).toCalledWith("onBeforeDraw", [layer.getContext()]);
-            });
-            it("调用draw，传入context", function () {
-                var fakeContext = {};
-                sandbox.stub(layer, "draw");
-                sandbox.stub(layer, "getContext").returns(fakeContext);
-
-                layer.ye_P_run();
-
-                expect(layer.draw).toCalledWith(fakeContext);
-            });
-            it("调用精灵类的onafterDraw方法", function () {
-                layer.ye_P_run();
-
-                expect(layer.iterate.getCall(3).args).toEqual(["onAfterDraw", [layer.getContext()]]);
-            });
-            it("恢复状态state为normal", function () {
-                layer.setStateChange();
-
-                layer.ye_P_run();
-
-                expect(layer.ye___isNormal()).toBeTruthy();
-            });
-        });
-
-//        it("执行精灵的onafterRun方法", function () {
+//
+//        describe("如果_state为change", function () {
+//            beforeEach(function () {
+//                setStateChange();
+//                sandbox.stub(layer, "clear");
+//                sandbox.stub(layer, "change");
+//            });
+//
+//            it("调用clear", function () {
+//                layer.ye_P_run();
+//
+//                expect(layer.clear).toCalledOnce();
+//            });
+//            it("调用精灵类的onbeforeDraw方法", function () {
+//                layer.ye_P_run();
+//
+//                expect(layer.iterate.secondCall).toCalledWith("onBeforeDraw", [layer.getContext()]);
+//            });
+//            it("调用draw，传入context", function () {
+//                var fakeContext = {};
+//                sandbox.stub(layer, "draw");
+//                sandbox.stub(layer, "getContext").returns(fakeContext);
+//
+//                layer.ye_P_run();
+//
+//                expect(layer.draw).toCalledWith(fakeContext);
+//            });
+//            it("调用精灵类的onafterDraw方法", function () {
+//                layer.ye_P_run();
+//
+//                expect(layer.iterate.getCall(3).args).toEqual(["onAfterDraw", [layer.getContext()]]);
+//            });
+//            it("恢复状态state为normal", function () {
+//                layer.setStateChange();
+//
+//                layer.ye_P_run();
+//
+//                expect(layer.ye___isNormal()).toBeTruthy();
+//            });
+//        });
+//
+////        it("执行精灵的onafterRun方法", function () {
+////            layer.ye_P_run();
+////
+////            expect(layer.iterate).toCalledWith("onafterRun");
+////        });
+//        it("调用change方法", function () {
+//            sandbox.stub(layer, "change");
+//
 //            layer.ye_P_run();
 //
-//            expect(layer.iterate).toCalledWith("onafterRun");
+//            expect(layer.change).toCalledOnce();
 //        });
-        it("调用change方法", function () {
-            sandbox.stub(layer, "change");
-
-            layer.ye_P_run();
-
-            expect(layer.change).toCalledOnce();
-        });
-    });
+//    });
 
     describe("getCanvasData", function () {
         it("获得画布数据", function () {
